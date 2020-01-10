@@ -44,7 +44,7 @@ def prep_image(img, inp_dim):
     img_ = torch.from_numpy(img_).float().div(255.0).unsqueeze(0)
     return img_, orig_im, dim
 
-def write(x, img,accum_image,th1):
+def write(x, img):
     startpoint = x[1:3].int() 
     endpoint = x[3:5].int()
     # startpointN = x[1:3].int()
