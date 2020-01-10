@@ -42,39 +42,19 @@ def prep_image(img, inp_dim):
     return img_, orig_im, dim
 
 def write(x, img):
-    # c1 = tuple(x[1:3].int())
-    # c2 = tuple(x[3:5].int())
-    # cls = int(x[-1])
-    # label = "{0}".format(classes[cls])
-    # color = random.choice(colors)
-    # cv2.rectangle(img, c1, c2,color, 1)
-    # t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1 , 1)[0]
-    # c2 = c1[0] + t_size[0] + 3, c1[1] + t_size[1] + 4
+    c1 = tuple(x[1:3].int())
+    c2 = tuple(x[3:5].int())
+    cls = int(x[-1])
+    label = "{0}".format(classes[cls])
+    color = random.choice(colors)
+    cv2.rectangle(img, c1, c2,color, 1)
+    t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1 , 1)[0]
+    c2 = c1[0] + t_size[0] + 3, c1[1] + t_size[1] + 4
     
-    # # Writing solid box -1 and the name of that object
-    # cv2.rectangle(img, c1, c2,color, -1)
-    # cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225,255,255], 1);
+    # Writing solid box -1 and the name of that object
+    cv2.rectangle(img, c1, c2,color, -1)
+    cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225,255,255], 1);
     # #
-
-    startpoint = x[1:3].int() 
-    endpoint = x[4:6].int()
-    startpointN = x[1:3].int()
-    endpointN = x[2:4].int()
-
-    startpointX = startpoint[0]+((endpoint[0]-startpoint[0])*0.4)
-    startpointY = startpoint[1]
-    endpointX = endpoint[0]-((endpoint[0]-startpoint[0])*0.4)
-    endpointY = startpointY+((endpoint[1]-startpointY)*0.1)
-    
-    startpoint[0] = startpointX.int()
-    startpoint[1] = startpointY.int()
-    endpoint[0] = endpointX.int()
-    endpoint[1] = endpointY.int()
-
-    c1 = tuple(startpoint)
-    c2 = tuple(endpoint)
-    c3 = tuple(startpointN)
-    c4 = tuple(endpointN)
 
     # Something something classes
     cls = int(x[-1])
@@ -82,11 +62,10 @@ def write(x, img):
     label = "{0}".format(classes[cls])
 
     # Rainbow color box every frame
-    # color = random.choice(colors)
-    color = (255, 255, 255) 
-    # Draw box 
+    color = random.choice(colors)
+    # Draw box
     cv2.rectangle(img, c1, c2,color, 1)
-    cv2.rectangle(img, c3, c4,color, 1)
+
 
     return img
 
