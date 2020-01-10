@@ -15,6 +15,7 @@ import argparse
 import copy
 
 th1 = 0
+count = 0
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -50,9 +51,9 @@ def write(x, img,accum_image,th1):
     # endpointN = x[2:4].int()
 
     startpointX = startpoint[0]+((endpoint[0]-startpoint[0])*0.4)
-    startpointY = startpoint[1]
+    startpointY = startpoint[1]+180
     endpointX = endpoint[0]-((endpoint[0]-startpoint[0])*0.4)
-    endpointY = startpointY+((endpoint[1]-startpointY)*0.1)
+    endpointY = startpointY+((endpoint[1]-startpointY)*.1)-20
     
     startpoint[0] = startpointX.int()
     startpoint[1] = startpointY.int()
@@ -68,6 +69,8 @@ def write(x, img,accum_image,th1):
     cls = int(x[-1])
     # Tell classes ex.person car bag
     label = "{0}".format(classes[cls])
+
+    # cv2.rectangle(img, (0, 0), (1979, 1079), (0, 0, 0), -1)
 
     # Rainbow color box every frame
     # color = random.choice(colors)
@@ -171,11 +174,16 @@ if __name__ == '__main__':
             ret, frame = cap.read()
             first_frame = copy.deepcopy(frame)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            # color = (255, 255, 255) 
-            # # Draw box 
-            # cv2.rectangle(img, c1, c2,color, -1)
+
+            color = (255, 255, 255)
+
             height, width = gray.shape[:2]
             accum_image = np.zeros((height, width), np.float64)
+
+            # cv2.rectangle(accum_image, (0, 0), (1979, 1079), color, -1)
+
+            # cv2.imread('accum_image',accum_image)
+
             first_iteration_indicator = 0
 
         else:
@@ -225,10 +233,11 @@ if __name__ == '__main__':
                 
                 classes = load_classes('data/coco.names')
                 colors = pkl.load(open("pallete", "rb"))
+
+                orig_im.fill(0)
                 
                 list(map(lambda x: write(x, orig_im,accum_image,th1), output))
-                
-                
+
                 cv2.imshow("frame", orig_im)
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
@@ -245,7 +254,7 @@ if __name__ == '__main__':
                 # cv2.imshow('diff-bkgnd-frame', fgmask)
 
                 thresh = 150
-                maxValue = 1
+                maxValue = 10
                 ret, th1 = cv2.threshold(fgmask, thresh, maxValue, cv2.THRESH_BINARY)
                 # for testing purposes, show the threshold image
                 cv2.imwrite('diff-th1.jpg', th1)
