@@ -236,7 +236,7 @@ if __name__ == '__main__':
 
                 orig_im.fill(0)
                 
-                list(map(lambda x: write(x, orig_im,accum_image,th1), output))
+                list(map(lambda x: write(x, orig_im), output))
 
                 cv2.imshow("frame", orig_im)
                 key = cv2.waitKey(1)
