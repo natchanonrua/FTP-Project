@@ -33,7 +33,6 @@ def prep_image(img, inp_dim):
     
     Returns a Variable 
     """
-
     orig_im = img
     dim = orig_im.shape[1], orig_im.shape[0]
     img = (letterbox_image(orig_im, (inp_dim, inp_dim)))
@@ -41,7 +40,7 @@ def prep_image(img, inp_dim):
     img_ = torch.from_numpy(img_).float().div(255.0).unsqueeze(0)
     return img_, orig_im, dim
 
-def write(x, img, count):
+def write(x, img):
     c1 = tuple(x[1:3].int())
     c2 = tuple(x[3:5].int())
     cls = int(x[-1])
@@ -58,8 +57,7 @@ def write(x, img, count):
         cv2.rectangle(img, c1, c2,color, -1)
         cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225,255,255], 1);
 
-
-    return img,count
+    return img
 
 def arg_parse():
     """
@@ -93,7 +91,6 @@ if __name__ == '__main__':
     confidence = float(args.confidence)
     nms_thesh = float(args.nms_thresh)
     start = 0
-    count = 0
 
     CUDA = torch.cuda.is_available()
 
@@ -135,7 +132,6 @@ if __name__ == '__main__':
         if ret:
             frames = 0
             start = time.time()
-            countn =+ count
             img, orig_im, dim = prep_image(frame, inp_dim)
 
             im_dim = torch.cuda.FloatTensor(dim).repeat(1,2)
@@ -177,7 +173,7 @@ if __name__ == '__main__':
             classes = load_classes('data/coco.names')
             colors = pkl.load(open("pallete", "rb"))
             
-            list(map(lambda x: write(x, orig_im, count), output))
+            list(map(lambda x: write(x, orig_im), output))
             
             cv2.imshow("frame", orig_im)
             key = cv2.waitKey(1)
