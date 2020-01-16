@@ -172,9 +172,10 @@ if __name__ == '__main__':
          
             classes = load_classes('data/coco.names')
             colors = pkl.load(open("pallete", "rb"))
-            
-            list(map(lambda x: write(x, orig_im), output))
-            
+
+            m = list(map(lambda x: write(x, orig_im), output))
+
+
             cv2.imshow("frame", orig_im)
             key = cv2.waitKey(1)
             if key & 0xFF == ord('q'):
