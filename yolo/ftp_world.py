@@ -48,14 +48,14 @@ def write(x, img):
     color = random.choice(colors)
 
 
-    if(cls == 0):
-    # Writing solid box -1 and the name of that object
-        cv2.rectangle(img, c1, c2, color, 1)
-        t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1, 1)[0]
-        c2 = c1[0] + t_size[0] + 3, c1[1] + t_size[1] + 4
 
-        cv2.rectangle(img, c1, c2,color, -1)
-        cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225,255,255], 1);
+    # Writing solid box -1 and the name of that object
+    cv2.rectangle(img, c1, c2, color, 1)
+    t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1, 1)[0]
+    c2 = c1[0] + t_size[0] + 3, c1[1] + t_size[1] + 4
+
+    cv2.rectangle(img, c1, c2,color, -1)
+    cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225,255,255], 1);
 
     return img
 
@@ -140,11 +140,13 @@ if __name__ == '__main__':
                 im_dim = im_dim.cuda()
                 img = img.cuda()
 
-            
+
             with torch.no_grad():   
                 output = model(Variable(img), CUDA)
-            output = write_results(output, confidence, num_classes, nms = True, nms_conf = nms_thesh)
 
+            output = write_results(output, confidence, num_classes, nms = True, nms_conf = nms_thesh)
+            print(output)
+            print(len(output))
 
             if type(output) == int:
                 frames += 1
@@ -154,10 +156,7 @@ if __name__ == '__main__':
                 if key & 0xFF == ord('q'):
                     break
                 continue
-            
-            
 
-            
             im_dim = im_dim.repeat(output.size(0), 1)
             scaling_factor = torch.min(inp_dim/im_dim,1)[0].view(-1,1)
             
@@ -174,7 +173,7 @@ if __name__ == '__main__':
             colors = pkl.load(open("pallete", "rb"))
 
             m = list(map(lambda x: write(x, orig_im), output))
-
+            print(len(m))
 
             cv2.imshow("frame", orig_im)
             key = cv2.waitKey(1)

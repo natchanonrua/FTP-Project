@@ -99,7 +99,7 @@ def unique(tensor):
 def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.4):
     conf_mask = (prediction[:,:,4] > confidence).float().unsqueeze(2)
     prediction = prediction*conf_mask
-    
+
 
     try:
         ind_nz = torch.nonzero(prediction[:,:,4]).transpose(0,1).contiguous()
@@ -117,15 +117,15 @@ def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.
 
     
     batch_size = prediction.size(0)
-    
+
+
     output = prediction.new(1, prediction.size(2) + 1)
     write = False
-
 
     for ind in range(batch_size):
         #select the image from the batch
         image_pred = prediction[ind]
-        
+
 
         
         #Get the class having maximum score, and the index of that class
@@ -136,15 +136,15 @@ def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.
         max_conf_score = max_conf_score.float().unsqueeze(1)
         seq = (image_pred[:,:5], max_conf, max_conf_score)
         image_pred = torch.cat(seq, 1)
-        
 
-        
+
+
         #Get rid of the zero entries
         non_zero_ind =  (torch.nonzero(image_pred[:,4]))
 
         
         image_pred_ = image_pred[non_zero_ind.squeeze(),:].view(-1,7)
-        
+
         #Get the various classes detected in the image
         try:
             img_classes = unique(image_pred_[:,-1])
@@ -183,7 +183,7 @@ def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.
                     
                     #Zero out all the detections that have IoU > treshhold
                     iou_mask = (ious < nms_conf).float().unsqueeze(1)
-                    image_pred_class[i+1:] *= iou_mask       
+                    image_pred_class[i+1:] *= iou_mask
                     
                     #Remove the non-zero entries
                     non_zero_ind = torch.nonzero(image_pred_class[:,4]).squeeze()
@@ -203,9 +203,9 @@ def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.
             if not write:
                 output = torch.cat(seq,1)
                 write = True
-            else:
-                out = torch.cat(seq,1)
-                output = torch.cat((output,out))
+            #else:
+             #   out = torch.cat(seq,1)
+             #   output = torch.cat((output,out))
     
     return output
 
@@ -273,12 +273,12 @@ def predict_transform_half(prediction, inp_dim, anchors, num_classes, CUDA = Tru
 def write_results_half(prediction, confidence, num_classes, nms = True, nms_conf = 0.4):
     conf_mask = (prediction[:,:,4] > confidence).half().unsqueeze(2)
     prediction = prediction*conf_mask
-    
+
     try:
         ind_nz = torch.nonzero(prediction[:,:,4]).transpose(0,1).contiguous()
     except:
         return 0
-    
+
     
     
     box_a = prediction.new(prediction.shape)
@@ -308,8 +308,8 @@ def write_results_half(prediction, confidence, num_classes, nms = True, nms_conf
         max_conf_score = max_conf_score.half().unsqueeze(1)
         seq = (image_pred[:,:5], max_conf, max_conf_score)
         image_pred = torch.cat(seq, 1)
-        
-        
+
+
         #Get rid of the zero entries
         non_zero_ind =  (torch.nonzero(image_pred[:,4]))
         try:
