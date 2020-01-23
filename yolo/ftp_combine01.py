@@ -14,7 +14,7 @@ import pickle as pkl
 import argparse
 import copy
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import Image
 from matplotlib import style
 
 style.use('fivethirtyeight')
@@ -280,8 +280,9 @@ if __name__ == '__main__':
     ax1.clear()
     ax1.plot(xs,ys)
     ax1.savefig('testplot.png')
+    Image.open('estplot.png').save('testplot.jpg','JPEG')
 
-    # cleanup
+    # cleanup1
     cap.release()
     cv2.destroyAllWindows()
 
