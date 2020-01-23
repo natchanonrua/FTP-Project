@@ -280,7 +280,7 @@ if __name__ == '__main__':
     ax1.clear()
     ax1.plot(xs,ys)
     ax1.savefig('testplot.png')
-    Image.open('estplot.png').save('testplot.jpg','JPEG')
+    Image.open('testplot.png').save('testplot.jpg','JPEG')
 
     # cleanup1
     cap.release()
