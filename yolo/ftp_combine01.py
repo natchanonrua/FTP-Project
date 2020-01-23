@@ -279,7 +279,7 @@ if __name__ == '__main__':
 
     # cleanup
     cap.release()
-    #cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
 
     
     
