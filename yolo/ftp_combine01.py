@@ -178,6 +178,9 @@ if __name__ == '__main__':
     first_iteration_indicator = 1
 
     count = 0
+
+    fgbg = cv2.createBackgroundSubtractorMOG2()
+
     while cap.isOpened():
         
         for x in range(11): cap.grab()
@@ -191,6 +194,10 @@ if __name__ == '__main__':
             height, width = gray.shape[:2]
             accum_image = np.zeros((height, width), np.float64)
             first_iteration_indicator = 0
+            if (count == 0):
+                f = open("count.txt", "w+")
+                f.write("0 \r\n")
+                count += 1
         else:
             ret, frame = cap.read()
             frame_g = copy.deepcopy(frame)
@@ -209,8 +216,6 @@ if __name__ == '__main__':
                     output = model(Variable(img), CUDA)
 
                 output = write_results(output, confidence, num_classes, nms = True, nms_conf = nms_thesh)
-                print(output)
-                print(len(output))
 
                 if type(output) == int:
                     frames += 1
@@ -236,46 +241,46 @@ if __name__ == '__main__':
                 classes = load_classes('data/coco.names')
                 colors = pkl.load(open("pallete", "rb"))
 
-                # orig_im.fill(0)
-
                 m = list(map(lambda x: write(x, orig_im), output))
 
                 cv2.imshow("frame", orig_im)
                 orig_im.fill(0)
 
                 h = list(map(lambda x: write_heatmap(x, orig_im), output))
-                print(len(m))
+
                 s = len(m)
 
-                if (count == 0):
-                    f = open("count.txt","w+")
-                    f.write("%d \r\n" % s)
-                    count = 1
+                if (count != 0):
+                    f = open("count.txt","a+")
+                    f.write(" %d \r\n"  %s)
 
-                else:
-                    f = open("count.txt", "a+")
-                    f.write("%d \r\n" % s)
-
-
-                # cv2.imshow("frame", orig_im)
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
                     break
                 frames += 1
                 print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+                fgmask = fgbg.apply(gray)
+
+                thresh = 150
+                maxValue = 10
+                ret, th1 = cv2.threshold(fgmask, thresh, maxValue, cv2.THRESH_BINARY)
+
+                cv2.imwrite('diff-th1.jpg', th1)
+
+                accum_image = cv2.add(accum_image, th1, dtype=cv2.CV_64F)
+
             else:
                 break
     accum_image = np.uint8(accum_image)
     color_image = im_color = cv2.applyColorMap(accum_image, cv2.COLORMAP_JET)
-
+    animate()
     # overlay the color mapped image to the first frame
     result_overlay = cv2.addWeighted(first_frame, 0.4, color_image, 0.4, 0)
 
     # save the final overlay image
     cv2.imwrite('diff-overlay.jpg', result_overlay)
-
-    ani = animation.FuncAnimation(fig,animate,interval=100)
-    plt.show()
 
     # cleanup
     cap.release()
