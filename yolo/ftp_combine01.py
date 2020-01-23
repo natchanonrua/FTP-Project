@@ -271,6 +271,7 @@ if __name__ == '__main__':
 
                 accum_image = cv2.add(accum_image, th1, dtype=cv2.CV_64F)
                 ani = animation.FuncAnimation(fig,animate,interval = 1)
+                plt.show()
             else:
                 break
     accum_image = np.uint8(accum_image)
