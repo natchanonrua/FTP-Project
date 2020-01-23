@@ -12,6 +12,7 @@ import pandas as pd
 import random 
 import pickle as pkl
 import argparse
+import copy
 
 
 def get_test_input(input_dim, CUDA):
@@ -56,6 +57,31 @@ def write(x, img):
 
     cv2.rectangle(img, c1, c2,color, -1)
     cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225,255,255], 1);
+
+    return img
+
+
+def write_heatmap(x, img):
+    startpoint = x[1:3].int()
+    endpoint = x[3:5].int()
+
+    startpointX = startpoint[0] + ((endpoint[0] - startpoint[0]) * 0.4)
+    startpointY = startpoint[1] + 180
+    endpointX = endpoint[0] - ((endpoint[0] - startpoint[0]) * 0.4)
+    endpointY = startpointY + ((endpoint[1] - startpointY) * .1) - 20
+
+    startpoint[0] = startpointX.int()
+    startpoint[1] = startpointY.int()
+    endpoint[0] = endpointX.int()
+    endpoint[1] = endpointY.int()
+
+    c1 = tuple(startpoint)
+    c2 = tuple(endpoint)
+
+    color = (255, 255, 255)
+    # Draw box
+    cv2.rectangle(img, c1, c2, color, -1)
+    # cv2.rectangle(img, c3, c4,color, -1)
 
     return img
 
@@ -122,69 +148,99 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture(videofile)
     
     assert cap.isOpened(), 'Cannot capture source'
-    
+
+    frames = 0
+    start = time.time()
+
+    first_iteration_indicator = 1
 
     while cap.isOpened():
         
         for x in range(11): cap.grab()
 
-        ret, frame = cap.read()
-        if ret:
-            frames = 0
-            start = time.time()
-            img, orig_im, dim = prep_image(frame, inp_dim)
+        if (first_iteration_indicator == 1):
+            ret, frame = cap.read()
+            first_frame = copy.deepcopy(frame)
+            frame_g = copy.deepcopy(frame)
+            gray = cv2.cvtColor(frame_g, cv2.COLOR_BGR2GRAY)
 
-            im_dim = torch.cuda.FloatTensor(dim).repeat(1,2)
+            color = (255, 255, 255)
 
-            if CUDA:
-                im_dim = im_dim.cuda()
-                img = img.cuda()
+            height, width = gray.shape[:2]
+            accum_image = np.zeros((height, width), np.float64)
+            first_iteration_indicator = 0
+        else:
+            ret, frame = cap.read()
+            frame_g = copy.deepcopy(frame)
+            if ret:
+
+                img, orig_im, dim = prep_image(frame_g, inp_dim)
+
+                im_dim = torch.cuda.FloatTensor(dim).repeat(1,2)
+
+                if CUDA:
+                    im_dim = im_dim.cuda()
+                    img = img.cuda()
 
 
-            with torch.no_grad():   
-                output = model(Variable(img), CUDA)
+                with torch.no_grad():
+                    output = model(Variable(img), CUDA)
 
-            output = write_results(output, confidence, num_classes, nms = True, nms_conf = nms_thesh)
-            print(output)
-            print(len(output))
+                output = write_results(output, confidence, num_classes, nms = True, nms_conf = nms_thesh)
+                print(output)
+                print(len(output))
 
-            if type(output) == int:
-                frames += 1
-                print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+                if type(output) == int:
+                    frames += 1
+                    print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+                    cv2.imshow("frame", orig_im)
+                    key = cv2.waitKey(1)
+                    if key & 0xFF == ord('q'):
+                        break
+                    continue
+
+                im_dim = im_dim.repeat(output.size(0), 1)
+                scaling_factor = torch.min(inp_dim/im_dim,1)[0].view(-1,1)
+            
+                output[:,[1,3]] -= (inp_dim - scaling_factor*im_dim[:,0].view(-1,1))/2
+                output[:,[2,4]] -= (inp_dim - scaling_factor*im_dim[:,1].view(-1,1))/2
+
+                output[:,1:5] /= scaling_factor
+
+                for i in range(output.shape[0]):
+                    output[i, [1,3]] = torch.clamp(output[i, [1,3]], 0.0, im_dim[i,0])
+                    output[i, [2,4]] = torch.clamp(output[i, [2,4]], 0.0, im_dim[i,1])
+         
+                classes = load_classes('data/coco.names')
+                colors = pkl.load(open("pallete", "rb"))
+
+                orig_im.fill(0)
+
+                m = list(map(lambda x: write(x, orig_im), output))
+                h = list(map(lambda x: write_heatmap(x, orig_im), output))
+                print(len(m))
+
                 cv2.imshow("frame", orig_im)
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
                     break
-                continue
+                frames += 1
+                print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
 
-            im_dim = im_dim.repeat(output.size(0), 1)
-            scaling_factor = torch.min(inp_dim/im_dim,1)[0].view(-1,1)
-            
-            output[:,[1,3]] -= (inp_dim - scaling_factor*im_dim[:,0].view(-1,1))/2
-            output[:,[2,4]] -= (inp_dim - scaling_factor*im_dim[:,1].view(-1,1))/2
-
-            output[:,1:5] /= scaling_factor
-
-            for i in range(output.shape[0]):
-                output[i, [1,3]] = torch.clamp(output[i, [1,3]], 0.0, im_dim[i,0])
-                output[i, [2,4]] = torch.clamp(output[i, [2,4]], 0.0, im_dim[i,1])
-         
-            classes = load_classes('data/coco.names')
-            colors = pkl.load(open("pallete", "rb"))
-
-            m = list(map(lambda x: write(x, orig_im), output))
-            print(len(m))
-
-            cv2.imshow("frame", orig_im)
-            key = cv2.waitKey(1)
-            if key & 0xFF == ord('q'):
+            else:
                 break
-            frames += 1
-            print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+    accum_image = np.uint8(accum_image)
+    color_image = im_color = cv2.applyColorMap(accum_image, cv2.COLORMAP_JET)
 
-        else:
-            break
-    
+    # overlay the color mapped image to the first frame
+    result_overlay = cv2.addWeighted(first_frame, 0.4, color_image, 0.4, 0)
+
+    # save the final overlay image
+    cv2.imwrite('diff-overlay.jpg', result_overlay)
+
+    # cleanup
+    cap.release()
+    cv2.destroyAllWindows()
 
     
     
