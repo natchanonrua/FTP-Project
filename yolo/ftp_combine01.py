@@ -22,21 +22,7 @@ style.use('fivethirtyeight')
 fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
 
-def animate(i):
-    graph_data = open('count.txt','r').read()
-    lines = graph_data.split('\n')
-    xs = []
-    ys = []
-    x = 0
-    for line in lines:
-        if len(line) > 1:
-            y = line.split()
-            x += 1
-            xs.append(x)
-            ys.append(y)
-    ax1.clear()
-    ax1.plot(xs,ys)
-    ax1.savefig('testplot.png')
+th = 0
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -188,18 +174,16 @@ if __name__ == '__main__':
         if (first_iteration_indicator == 1):
             ret, frame = cap.read()
             first_frame = copy.deepcopy(frame)
-            frame_g = copy.deepcopy(frame)
-            gray = cv2.cvtColor(frame_g, cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             height, width = gray.shape[:2]
             accum_image = np.zeros((height, width), np.float64)
             first_iteration_indicator = 0
         else:
             ret, frame = cap.read()
-            frame_g = copy.deepcopy(frame)
             if ret:
 
-                img, orig_im, dim = prep_image(frame_g, inp_dim)
+                img, orig_im, dim = prep_image(frame, inp_dim)
 
                 im_dim = torch.cuda.FloatTensor(dim).repeat(1,2)
 
@@ -276,12 +260,26 @@ if __name__ == '__main__':
                 break
     accum_image = np.uint8(accum_image)
     color_image = im_color = cv2.applyColorMap(accum_image, cv2.COLORMAP_JET)
-    animate()
     # overlay the color mapped image to the first frame
     result_overlay = cv2.addWeighted(first_frame, 0.4, color_image, 0.4, 0)
 
     # save the final overlay image
     cv2.imwrite('diff-overlay.jpg', result_overlay)
+
+    graph_data = open('count.txt','r').read()
+    lines = graph_data.split('\n')
+    xs = []
+    ys = []
+    x = 0
+    for line in lines:
+        if len(line) > 1:
+            y = line.split()
+            x += 1
+            xs.append(x)
+            ys.append(y)
+    ax1.clear()
+    ax1.plot(xs,ys)
+    ax1.savefig('testplot.png')
 
     # cleanup
     cap.release()
