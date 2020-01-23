@@ -13,7 +13,29 @@ import random
 import pickle as pkl
 import argparse
 import copy
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib import style
 
+style.use('fivethirtyeight')
+
+fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
+
+def animate(i):
+    graph_data = open('count.txt','r').read()
+    lines = graph_data.split('\n')
+    xs = []
+    ys = []
+    x = 0
+    for line in lines:
+        if len(line) > 1:
+            y = line.split()
+            x += 1
+            xs.append(x)
+            ys.append(y)
+    ax1.clear()
+    ax1.plot(xs,ys)
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -154,6 +176,7 @@ if __name__ == '__main__':
 
     first_iteration_indicator = 1
 
+    count = 0
     while cap.isOpened():
         
         for x in range(11): cap.grab()
@@ -221,6 +244,17 @@ if __name__ == '__main__':
 
                 h = list(map(lambda x: write_heatmap(x, orig_im), output))
                 print(len(m))
+                s = len(m)
+
+                if (count == 0):
+                    f = open("count.txt","w+")
+                    f.write("%d \r\n" % s)
+                    count = 1
+
+                else:
+                    f = open("count.txt", "a+")
+                    f.write("%d \r\n" % s)
+
 
                 # cv2.imshow("frame", orig_im)
                 key = cv2.waitKey(1)
@@ -228,7 +262,6 @@ if __name__ == '__main__':
                     break
                 frames += 1
                 print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
-
             else:
                 break
     accum_image = np.uint8(accum_image)
@@ -240,9 +273,12 @@ if __name__ == '__main__':
     # save the final overlay image
     cv2.imwrite('diff-overlay.jpg', result_overlay)
 
+    ani = animation.FuncAnimation(fig,animate,interval=100)
+    plt.show()
+
     # cleanup
     cap.release()
-    cv2.destroyAllWindows()
+    #cv2.destroyAllWindows()
 
     
     
