@@ -164,8 +164,6 @@ if __name__ == '__main__':
             frame_g = copy.deepcopy(frame)
             gray = cv2.cvtColor(frame_g, cv2.COLOR_BGR2GRAY)
 
-            color = (255, 255, 255)
-
             height, width = gray.shape[:2]
             accum_image = np.zeros((height, width), np.float64)
             first_iteration_indicator = 0
@@ -214,13 +212,17 @@ if __name__ == '__main__':
                 classes = load_classes('data/coco.names')
                 colors = pkl.load(open("pallete", "rb"))
 
-                orig_im.fill(0)
+                # orig_im.fill(0)
 
                 m = list(map(lambda x: write(x, orig_im), output))
+
+                cv2.imshow("frame", orig_im)
+                orig_im.fill(0)
+
                 h = list(map(lambda x: write_heatmap(x, orig_im), output))
                 print(len(m))
 
-                cv2.imshow("frame", orig_im)
+                # cv2.imshow("frame", orig_im)
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
                     break
