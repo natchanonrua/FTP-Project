@@ -36,6 +36,7 @@ def animate(i):
             ys.append(y)
     ax1.clear()
     ax1.plot(xs,ys)
+    ax1.savefig('testplot.png')
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
