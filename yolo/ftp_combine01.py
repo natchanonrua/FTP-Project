@@ -194,10 +194,6 @@ if __name__ == '__main__':
             height, width = gray.shape[:2]
             accum_image = np.zeros((height, width), np.float64)
             first_iteration_indicator = 0
-            if (count == 0):
-                f = open("count.txt", "w+")
-                f.write("0 \r\n")
-                count += 1
         else:
             ret, frame = cap.read()
             frame_g = copy.deepcopy(frame)
@@ -250,9 +246,14 @@ if __name__ == '__main__':
 
                 s = len(m)
 
-                if (count != 0):
-                    f = open("count.txt","a+")
-                    f.write(" %d \r\n"  %s)
+                if (count == 0):
+                    f = open("count.txt","w+")
+                    f.write("%d \r\n" % s)
+                    count = 1
+
+                else:
+                    f = open("count.txt", "a+")
+                    f.write("%d \r\n" % s)
 
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
