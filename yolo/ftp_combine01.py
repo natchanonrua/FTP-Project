@@ -14,7 +14,7 @@ import pickle as pkl
 import argparse
 import copy
 import matplotlib.pyplot as plt
-import Image
+import matplotlib.animation as animation
 from matplotlib import style
 
 style.use('fivethirtyeight')
@@ -23,6 +23,21 @@ fig = plt.figure()
 ax1 = fig.add_subplot(1,1,1)
 
 th = 0
+
+def animate(i):
+    graph_data = open('count.txt', 'r').read()
+    lines = graph_data.split('\n')
+    xs = []
+    ys = []
+    x = 0
+    for line in lines:
+        if len(line) > 1:
+            y = line.split()
+            x += 1
+            xs.append(x)
+            ys.append(y)
+    ax1.clear()
+    ax1.plot(xs, ys)
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -255,7 +270,7 @@ if __name__ == '__main__':
                 cv2.imwrite('diff-th1.jpg', th1)
 
                 accum_image = cv2.add(accum_image, th1, dtype=cv2.CV_64F)
-
+                ani = animation.FuncAnimation(fig,animate,interval = 1)
             else:
                 break
     accum_image = np.uint8(accum_image)
@@ -266,21 +281,7 @@ if __name__ == '__main__':
     # save the final overlay image
     cv2.imwrite('diff-overlay.jpg', result_overlay)
 
-    graph_data = open('count.txt','r').read()
-    lines = graph_data.split('\n')
-    xs = []
-    ys = []
-    x = 0
-    for line in lines:
-        if len(line) > 1:
-            y = line.split()
-            x += 1
-            xs.append(x)
-            ys.append(y)
-    ax1.clear()
-    ax1.plot(xs,ys)
-    ax1.savefig('testplot.png')
-    Image.open('testplot.png').save('testplot.jpg','JPEG')
+    fig.savefig('test.jpg')
 
     # cleanup1
     cap.release()
