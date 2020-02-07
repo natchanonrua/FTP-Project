@@ -1,7 +1,4 @@
 from __future__ import division
-
-from datetime import datetime
-
 import ui as interface
 import time
 import torch
@@ -25,7 +22,6 @@ from matplotlib import style
 th = 0
 people_number = 0
 
-
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
     img = cv2.resize(img, (input_dim, input_dim))
@@ -39,12 +35,11 @@ def get_test_input(input_dim, CUDA):
 
     return img_
 
-
 def prep_image(img, inp_dim):
     """
-    Prepare image for inputting to the neural network. 
-    
-    Returns a Variable 
+    Prepare image for inputting to the neural network.
+
+    Returns a Variable
     """
     orig_im = img
     dim = orig_im.shape[1], orig_im.shape[0]
@@ -52,7 +47,6 @@ def prep_image(img, inp_dim):
     img_ = img[:, :, ::-1].transpose((2, 0, 1)).copy()
     img_ = torch.from_numpy(img_).float().div(255.0).unsqueeze(0)
     return img_, orig_im, dim
-
 
 def write(x, img):
     c1 = tuple(x[1:3].int())
@@ -70,7 +64,6 @@ def write(x, img):
     cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225, 255, 255], 1);
 
     return img
-
 
 def write_heatmap(x, img):
     startpoint = x[1:3].int()
@@ -100,14 +93,14 @@ def write_heatmap(x, img):
 def arg_parse():
     """
     Parse arguements to the detect module
-    
+
     """
 
     parser = argparse.ArgumentParser(description='YOLO v3 Video Detection Module')
 
     parser.add_argument("--video", dest='video', help=
     "Video to run detection upon",
-                        default="video.avi", type=str)
+                        default="TownCentreXVID.avi", type=str)
     parser.add_argument("--dataset", dest="dataset", help="Dataset on which the network has been trained",
                         default="pascal")
     parser.add_argument("--confidence", dest="confidence", help="Object Confidence to filter predictions", default=0.5)
@@ -123,8 +116,8 @@ def arg_parse():
                         default="416", type=str)
     return parser.parse_args()
 
+def run(self):
 
-if __name__ == '__main__':
     args = arg_parse()
     confidence = float(args.confidence)
     nms_thesh = float(args.nms_thresh)
@@ -173,26 +166,9 @@ if __name__ == '__main__':
 
     fgbg = cv2.createBackgroundSubtractorMOG2()
 
-    file_name = datetime.now().strftime("%Y%m%d-%H%M%S")
-
-    # output_fps = cap.get(cv2.CAP_PROP_FPS)
-
-    output_fps = 2.0
-
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-
-    width_video = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-
-    height_video = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    frame_size = (width_video,height_video)
-
-    output_video = cv2.VideoWriter(file_name + ".avi", fourcc, output_fps, frame_size)
-
     while cap.isOpened():
 
         for x in range(11): cap.grab()
-
 
         if (first_iteration_indicator == 1):
             ret, frame = cap.read()
@@ -246,15 +222,13 @@ if __name__ == '__main__':
                 m = list(map(lambda x: write(x, orig_im), output))
 
                 cv2.imshow("frame", orig_im)
-                output_video.write(orig_im)
                 orig_im.fill(0)
 
                 h = list(map(lambda x: write_heatmap(x, orig_im), output))
 
                 s = len(m)
-                # print(s)
 
-                # interface.Ui_main().set_number(s)
+                interface.self.update_people_number(self,s)
 
                 if (count == 0):
                     f = open("count.txt", "w+")
@@ -290,7 +264,7 @@ if __name__ == '__main__':
     result_overlay = cv2.addWeighted(first_frame, 0.4, color_image, 0.4, 0)
 
     # save the final overlay image
-    cv2.imwrite(file_name+'-heatmap.jpg', result_overlay)
+    cv2.imwrite('diff-overlay.jpg', result_overlay)
 
     graph_data = open('count.txt', 'r').read()
     lines = graph_data.split('\n')
@@ -302,9 +276,8 @@ if __name__ == '__main__':
             xs.append(int(x))
             ys.append(int(y))
     plt.plot(xs, ys)
-    plt.savefig(file_name+'-graph.jpg')
+    plt.savefig('test.jpg')
 
     # cleanup1
-    output_video.release()
     cap.release()
     cv2.destroyAllWindows()

@@ -176,7 +176,7 @@ if __name__ == '__main__':
             print(len(m))
 
             cv2.imshow("frame", orig_im)
-            key = cv2.waitKey(1)
+            key = cv2.waitKey(5000)
             if key & 0xFF == ord('q'):
                 break
             frames += 1
