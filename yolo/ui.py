@@ -34,73 +34,135 @@ class Ui_main():
     global name_in
 
     def __init__(self):
-        self.horizontalLayoutWidget = QtWidgets.QWidget(main)
-        self.verticalLayoutWidget = QtWidgets.QWidget(main)
-        self.verticalLayoutWidget_2 = QtWidgets.QWidget(main)
-        self.verticalLayoutWidget_3 = QtWidgets.QWidget(main)
+        self.horizontalLayoutWidget_3 = QtWidgets.QWidget(main)
+        self.statusTitle = QtWidgets.QLabel(main)
+        self.countingLabel = QtWidgets.QLabel(main)
+        self.statusLabel = QtWidgets.QLabel(main)
+        self.heatmapLabel = QtWidgets.QLabel(main)
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-        self.submitButton = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
-        self.counting = QtWidgets.QCheckBox(self.verticalLayoutWidget_2)
-        self.movementheatmap = QtWidgets.QCheckBox(self.verticalLayoutWidget_2)
-        self.movementline = QtWidgets.QCheckBox(self.verticalLayoutWidget_2)
-        self.heatmap = QtWidgets.QCheckBox(self.verticalLayoutWidget_2)
-        self.selectButton = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
-        self.menuLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
-        self.title = QtWidgets.QLabel(self.verticalLayoutWidget)
-        self.titleLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
-        self.showWidget = QVideoWidget(main)
-        self.peopleLabel = QtWidgets.QLabel(self.horizontalLayoutWidget)
-        self.peopleNo = QtWidgets.QLCDNumber(self.horizontalLayoutWidget)
-        self.peopleBox = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
-        self.progressBar = QtWidgets.QProgressBar(self.verticalLayoutWidget_3)
-        self.progressLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_3)
-        self.resultWidget = QVideoWidget(main)
+        self.videoWidget = QVideoWidget(main)
+        self.counting = QtWidgets.QCheckBox(self.horizontalLayoutWidget_3)
+        self.heatmap = QtWidgets.QCheckBox(self.horizontalLayoutWidget_3)
+        self.selectButton = QtWidgets.QPushButton(self.horizontalLayoutWidget_3)
+        self.buttonLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_3)
 
     def setupUi(self, main):
         main.setObjectName("main")
-        main.resize(1024, 768)
+        main.setWindowModality(QtCore.Qt.NonModal)
+        main.resize(1230, 318)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(main.sizePolicy().hasHeightForWidth())
+        main.setSizePolicy(sizePolicy)
         main.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         main.setAcceptDrops(False)
         main.setAutoFillBackground(False)
-        main.setFixedSize(main.size())
+        main.setModal(False)
         #
         #
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 10, 1021, 80))
-        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-
-        self.titleLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
-        self.titleLayout.setContentsMargins(0, 0, 0, 0)
-        self.titleLayout.setSpacing(0)
-        self.titleLayout.setObjectName("titleLayout")
-        self.title.setEnabled(True)
-
-        font = QtGui.QFont()
-        font.setPointSize(26)
-        font.setBold(True)
-        font.setWeight(75)
-
-        self.title.setFont(font)
-        self.title.setTextFormat(QtCore.Qt.AutoText)
-        self.title.setAlignment(QtCore.Qt.AlignCenter)
-        self.title.setObjectName("title")
-        self.titleLayout.addWidget(self.title)
+        # self.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 10, 1021, 80))
+        # self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        #
+        # self.titleLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
+        # self.titleLayout.setContentsMargins(0, 0, 0, 0)
+        # self.titleLayout.setSpacing(0)
+        # self.titleLayout.setObjectName("titleLayout")
+        # self.title.setEnabled(True)
+        #
+        # font = QtGui.QFont()
+        # font.setPointSize(26)
+        # font.setBold(True)
+        # font.setWeight(75)
+        #
+        # self.title.setFont(font)
+        # self.title.setTextFormat(QtCore.Qt.AutoText)
+        # self.title.setAlignment(QtCore.Qt.AlignCenter)
+        # self.title.setObjectName("title")
+        # self.titleLayout.addWidget(self.title)
         #
         #
-        self.verticalLayoutWidget_2 = QtWidgets.QWidget(main)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(50, 130, 391, 271))
-        self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
-        self.menuLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
-        self.menuLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
-        self.menuLayout.setContentsMargins(0, 0, 0, 0)
-        self.menuLayout.setSpacing(0)
-        self.menuLayout.setObjectName("menuLayout")
-
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.menuLayout.addItem(spacerItem)
-
-        self.buttonLayout = QtWidgets.QHBoxLayout()
+        # self.verticalLayoutWidget_2 = QtWidgets.QWidget(main)
+        # self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(50, 130, 391, 271))
+        # self.verticalLayoutWidget_2.setObjectName("verticalLayoutWidget_2")
+        # self.menuLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_2)
+        # self.menuLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
+        # self.menuLayout.setContentsMargins(0, 0, 0, 0)
+        # self.menuLayout.setSpacing(0)
+        # self.menuLayout.setObjectName("menuLayout")
+        #
+        # spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        # self.menuLayout.addItem(spacerItem)
+        #
+        # self.buttonLayout = QtWidgets.QHBoxLayout()
+        # self.buttonLayout.setObjectName("buttonLayout")
+        # self.selectButton = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.selectButton.sizePolicy().hasHeightForWidth())
+        # self.selectButton.setSizePolicy(sizePolicy)
+        # font = QtGui.QFont()
+        # font.setPointSize(10)
+        # self.selectButton.setFont(font)
+        # self.selectButton.setObjectName("selectButton")
+        # self.selectButton.clicked.connect(self.abrir)
+        # self.buttonLayout.addWidget(self.selectButton)
+        #
+        # self.submitButton = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.submitButton.sizePolicy().hasHeightForWidth())
+        # self.submitButton.setSizePolicy(sizePolicy)
+        # font = QtGui.QFont()
+        # font.setPointSize(10)
+        # self.submitButton.setFont(font)
+        # self.submitButton.setObjectName("submitButton")
+        # self.buttonLayout.addWidget(self.submitButton)
+        # self.submitButton.clicked.connect(self.run_process)
+        # self.menuLayout.addLayout(self.buttonLayout)
+        #
+        # spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        # self.menuLayout.addItem(spacerItem1)
+        #
+        # self.checkBoxLayout = QtWidgets.QHBoxLayout()
+        # self.checkBoxLayout.setObjectName("checkBoxLayout")
+        #
+        # self.heatmap = QtWidgets.QCheckBox(self.verticalLayoutWidget_2)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.heatmap.sizePolicy().hasHeightForWidth())
+        # self.heatmap.setSizePolicy(sizePolicy)
+        # font = QtGui.QFont()
+        # font.setPointSize(12)
+        # self.heatmap.setFont(font)
+        # self.heatmap.setObjectName("heatmap")
+        # self.checkBoxLayout.addWidget(self.heatmap, 0, QtCore.Qt.AlignHCenter)
+        #
+        # self.counting = QtWidgets.QCheckBox(self.verticalLayoutWidget_2)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.counting.sizePolicy().hasHeightForWidth())
+        # self.counting.setSizePolicy(sizePolicy)
+        # font = QtGui.QFont()
+        # font.setPointSize(12)
+        # self.counting.setFont(font)
+        # self.counting.setObjectName("counting")
+        # self.checkBoxLayout.addWidget(self.counting)
+        # self.menuLayout.addLayout(self.checkBoxLayout)
+        #
+        # spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        # self.menuLayout.addItem(spacerItem2)
+        #
+        #
+        self.horizontalLayoutWidget_3.setGeometry(QtCore.QRect(20, 240, 1191, 39))
+        self.horizontalLayoutWidget_3.setObjectName("horizontalLayoutWidget_3")
+        self.buttonLayout.setContentsMargins(0, 0, 0, 0)
         self.buttonLayout.setObjectName("buttonLayout")
-        self.selectButton = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
+
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -113,28 +175,6 @@ class Ui_main():
         self.selectButton.clicked.connect(self.abrir)
         self.buttonLayout.addWidget(self.selectButton)
 
-        self.submitButton = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.submitButton.sizePolicy().hasHeightForWidth())
-        self.submitButton.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.submitButton.setFont(font)
-        self.submitButton.setObjectName("submitButton")
-        self.buttonLayout.addWidget(self.submitButton)
-        self.submitButton.clicked.connect(self.run_process)
-        self.menuLayout.addLayout(self.buttonLayout)
-
-
-        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        self.menuLayout.addItem(spacerItem1)
-
-        self.checkBoxLayout = QtWidgets.QHBoxLayout()
-        self.checkBoxLayout.setObjectName("checkBoxLayout")
-
-        self.heatmap = QtWidgets.QCheckBox(self.verticalLayoutWidget_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -144,9 +184,8 @@ class Ui_main():
         font.setPointSize(12)
         self.heatmap.setFont(font)
         self.heatmap.setObjectName("heatmap")
-        self.checkBoxLayout.addWidget(self.heatmap, 0, QtCore.Qt.AlignHCenter)
+        self.buttonLayout.addWidget(self.heatmap)
 
-        self.counting = QtWidgets.QCheckBox(self.verticalLayoutWidget_2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -156,73 +195,71 @@ class Ui_main():
         font.setPointSize(12)
         self.counting.setFont(font)
         self.counting.setObjectName("counting")
-        self.checkBoxLayout.addWidget(self.counting)
-        self.menuLayout.addLayout(self.checkBoxLayout)
+        self.buttonLayout.addWidget(self.counting)
 
-        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.menuLayout.addItem(spacerItem2)
+        spacerItem = QtWidgets.QSpacerItem(600, 20, QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Minimum)
+        self.buttonLayout.addItem(spacerItem)
+
+        self.submitButton = QtWidgets.QPushButton(self.horizontalLayoutWidget_3)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.submitButton.sizePolicy().hasHeightForWidth())
+        self.submitButton.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.submitButton.setFont(font)
+        self.submitButton.setObjectName("submitButton")
+        self.submitButton.clicked.connect(self.run_process)
+        self.buttonLayout.addWidget(self.submitButton)
         #
         #
-        self.showWidget.setGeometry(QtCore.QRect(500, 130, 480, 270))
-        self.showWidget.setObjectName("showWidget")
+        self.videoWidget.setGeometry(QtCore.QRect(20, 20, 380, 201))
+        self.videoWidget.setAutoFillBackground(False)
+        self.videoWidget.setObjectName("videoWidget")
         #
         #
-        self.label = QtWidgets.QLabel(main)
-        self.label.setGeometry(QtCore.QRect(496, 450, 481, 271))
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setObjectName("pixLabel")
+        self.heatmapLabel.setGeometry(QtCore.QRect(420, 20, 380, 201))
+        self.heatmapLabel.setFrameShape(QtWidgets.QFrame.Box)
+        self.heatmapLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.heatmapLabel.setObjectName("heatmapLabel")
+
+        self.statusLabel.setGeometry(QtCore.QRect(1140, 280, 71, 31))
+        self.statusLabel.setScaledContents(False)
+        self.statusLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.statusLabel.setIndent(-1)
+        self.statusLabel.setObjectName("statusLabel")
+
+        self.countingLabel.setGeometry(QtCore.QRect(830, 20, 380, 201))
+        self.countingLabel.setFrameShape(QtWidgets.QFrame.Box)
+        self.countingLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.countingLabel.setObjectName("countingLabel")
+        #
+        #
+        self.statusTitle.setGeometry(QtCore.QRect(1090, 280, 61, 31))
+        self.statusTitle.setScaledContents(False)
+        self.statusTitle.setAlignment(QtCore.Qt.AlignCenter)
+        self.statusTitle.setIndent(-1)
+        self.statusTitle.setObjectName("statusTitle")
         #
         #
         self.retranslateUi(main)
         QtCore.QMetaObject.connectSlotsByName(main)
         #
         #
-        self.mediaPlayer.setVideoOutput(self.showWidget)
-        #
-        #
-        # self.horizontalLayoutWidget.setGeometry(QtCore.QRect(670, 400, 171, 51))
-        # self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-        # self.peopleBox.setContentsMargins(0, 0, 0, 0)
-        # self.peopleBox.setObjectName("peopleBox")
-        # self.peopleNo.setFrameShape(QtWidgets.QFrame.NoFrame)
-        # self.peopleNo.setSmallDecimalPoint(False)
-        # self.peopleNo.setSegmentStyle(QtWidgets.QLCDNumber.Filled)
-        # self.peopleNo.setObjectName("peopleNo")
-        # self.peopleBox.addWidget(self.peopleNo)
-        # font = QtGui.QFont()
-        # font.setPointSize(11)
-        # self.peopleLabel.setFont(font)
-        # self.peopleLabel.setAlignment(QtCore.Qt.AlignCenter)
-        # self.peopleLabel.setObjectName("peopleLabel")
-        # self.peopleBox.addWidget(self.peopleLabel)
-        #
-        #
-        self.verticalLayoutWidget_3.setGeometry(QtCore.QRect(50, 450, 421, 271))
-        self.verticalLayoutWidget_3.setObjectName("verticalLayoutWidget_3")
-
-        self.progressLayout.setContentsMargins(0, 0, 0, 0)
-        self.progressLayout.setObjectName("progressLayout")
-
-        self.progressBar.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
-        self.progressBar.setProperty("value", 0)
-        self.progressBar.setAlignment(QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft)
-        self.progressBar.setOrientation(QtCore.Qt.Horizontal)
-        self.progressBar.setObjectName("progressBar")
-        self.progressBar.setTextVisible(False)
-        self.progressLayout.addWidget(self.progressBar)
-        #
-        #
+        self.mediaPlayer.setVideoOutput(self.videoWidget)
 
     def retranslateUi(self, main):
         _translate = QtCore.QCoreApplication.translate
-        main.setWindowTitle(_translate("main", "[FTP] CCC System Beta"))
-        self.title.setText(_translate("main", "[FTP] CCC System Beta"))
+        main.setWindowTitle(_translate("main", "[FTP] Triple C System"))
         self.selectButton.setText(_translate("main", "Select Video"))
         self.heatmap.setText(_translate("main", "Heatmap"))
         self.counting.setText(_translate("main", "Counting people"))
         self.submitButton.setText(_translate("main", "Submit"))
-        self.peopleLabel.setText(_translate("main", "People"))
-        self.label.setText(_translate("main", "Not Available"))
+        self.heatmapLabel.setText(_translate("main", "Heatmap"))
+        self.statusLabel.setText(_translate("main", "Not Ready"))
+        self.countingLabel.setText(_translate("main", "Counting People"))
+        self.statusTitle.setText(_translate("main", "Status:"))
 
     def abrir(self):
         global name_in
@@ -238,7 +275,7 @@ class Ui_main():
             if QFileInfo(selected_file).path() != QDir.currentPath():
                 shutil.copy(selected_file, os.getcwd()+"\\"+name_of_file)
 
-        self.progressBar.setValue(0)
+            self.statusLabel.setText("Ready")
 
     def play(self):
         self.mediaPlayer.play()
@@ -247,18 +284,15 @@ class Ui_main():
         if "test" in name_in:
             return
         else:
-            self.progressBar.setValue(10)
+            self.statusLabel.setText("Processing...")
             command = "conda activate yolov3 && python ftp_combine01.py --video "+name_in
-            self.progressBar.setValue(30)
             os.system(command)
-            self.progressBar.setValue(60)
             self.show_video()
-            self.progressBar.setValue(80)
             if self.heatmap.isChecked():
                 self.show_heatmap()
             if self.counting.isChecked():
                 self.show_counting()
-            self.progressBar.setValue(100)
+            self.statusLabel.setText("Complete")
 
     def show_video(self):
         directory = QDir(os.getcwd())
@@ -274,6 +308,7 @@ class Ui_main():
 
         self.mediaPlayer.setMedia(
             QMediaContent(QUrl.fromLocalFile(os.getcwd()+"\\"+out)))
+        self.mediaPlayer.setPlaybackRate()
         self.play()
 
     def show_heatmap(self):
@@ -289,12 +324,12 @@ class Ui_main():
                 out = show.fileName()
                 break
 
-        w = self.label.width()
-        h = self.label.height()
+        w = self.heatmapLabel.width()
+        h = self.heatmapLabel.height()
 
         pixmap = QPixmap(out)
         pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
-        self.label.setPixmap(pixmap)
+        self.heatmapLabel.setPixmap(pixmap)
 
     def show_counting(self):
         directory = QDir(os.getcwd())
@@ -309,21 +344,12 @@ class Ui_main():
                 out = show.fileName()
                 break
 
-        w = self.label.width()
-        h = self.label.height()
+        w = self.countingLabel.width()
+        h = self.countingLabel.height()
 
         pixmap = QPixmap(out)
         pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
-        self.label.setPixmap(pixmap)
-
-    def set_progressbar(self):
-        maxval = 80
-        start = 0
-        print(1)
-        while start <= maxval:
-            start = start + 3
-            self.progressBar.setValue(start)
-            time.sleep(1)
+        self.countingLabel.setPixmap(pixmap)
 
 if __name__ == "__main__":
     import sys
