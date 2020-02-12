@@ -7,21 +7,23 @@
 # WARNING! All changes made in this file will be lost!
 import os
 import shutil
+import time
 
-from ftp_main import *
+from PyQt5.QtGui import QPixmap
+import ftp_combine01 as cnn
 
 try:
     # new location for sip
     # https://www.riverbankcomputing.com/static/Docs/PyQt5/incompatibilities.html#pyqt-v5-11
-    from PyQt5 import sip
+    from PyQt5 import sip, Qt
 except ImportError:
     import sip
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QUrl, QFileInfo, QDir
+from PyQt5.QtCore import QUrl, QFileInfo, QDir, QThread, pyqtSignal
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 # from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
@@ -165,9 +167,10 @@ class Ui_main():
         self.showWidget.setObjectName("showWidget")
         #
         #
-        self.resultWidget.setGeometry(QtCore.QRect(500, 450, 480, 270))
-        self.resultWidget.setAutoFillBackground(False)
-        self.resultWidget.setObjectName("resultWidget")
+        self.label = QtWidgets.QLabel(main)
+        self.label.setGeometry(QtCore.QRect(496, 450, 481, 271))
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("pixLabel")
         #
         #
         self.retranslateUi(main)
@@ -205,7 +208,10 @@ class Ui_main():
         self.progressBar.setAlignment(QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft)
         self.progressBar.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar.setObjectName("progressBar")
+        self.progressBar.setTextVisible(False)
         self.progressLayout.addWidget(self.progressBar)
+        #
+        #
 
     def retranslateUi(self, main):
         _translate = QtCore.QCoreApplication.translate
@@ -216,6 +222,7 @@ class Ui_main():
         self.counting.setText(_translate("main", "Counting people"))
         self.submitButton.setText(_translate("main", "Submit"))
         self.peopleLabel.setText(_translate("main", "People"))
+        self.label.setText(_translate("main", "Not Available"))
 
     def abrir(self):
         global name_in
@@ -226,24 +233,97 @@ class Ui_main():
                 QMediaContent(QUrl.fromLocalFile(selected_file)))
             self.play()
             name_of_file = QFileInfo(selected_file).fileName()
-            shutil.copy(selected_file, os.getcwd()+"\\"+name_of_file)
             name_in = str(name_of_file)
+
+            if QFileInfo(selected_file).path() != QDir.currentPath():
+                shutil.copy(selected_file, os.getcwd()+"\\"+name_of_file)
+
+        self.progressBar.setValue(0)
 
     def play(self):
         self.mediaPlayer.play()
 
     def run_process(self):
-        command = "conda activate yolov3 && python ftp_combine01.py --video "+name_in
-        print(command)
-        os.system(command)
-
-    def update_people_number(self,num):
-        self.peopleNo.display(num)
+        if "test" in name_in:
+            return
+        else:
+            self.progressBar.setValue(10)
+            command = "conda activate yolov3 && python ftp_combine01.py --video "+name_in
+            self.progressBar.setValue(30)
+            os.system(command)
+            self.progressBar.setValue(60)
+            self.show_video()
+            self.progressBar.setValue(80)
+            if self.heatmap.isChecked():
+                self.show_heatmap()
+            if self.counting.isChecked():
+                self.show_counting()
+            self.progressBar.setValue(100)
 
     def show_video(self):
-        output = QDir.current()
-        output.setFilter()
+        directory = QDir(os.getcwd())
+        directory.setFilter(QDir.Files | QDir.NoDotDot | QDir.NoDotAndDotDot)
+        directory.setSorting(QDir.Time)
+        set_filter = ["*.avi"]
+        directory.setNameFilters(set_filter)
 
+        for show in directory.entryInfoList():
+            print("%s %s" % (show.size(), show.fileName()))
+            out = show.fileName()
+            break
+
+        self.mediaPlayer.setMedia(
+            QMediaContent(QUrl.fromLocalFile(os.getcwd()+"\\"+out)))
+        self.play()
+
+    def show_heatmap(self):
+        directory = QDir(os.getcwd())
+        directory.setFilter(QDir.Files | QDir.NoDotDot | QDir.NoDotAndDotDot)
+        directory.setSorting(QDir.Time)
+        set_filter = ["*.jpg"]
+        directory.setNameFilters(set_filter)
+
+        for show in directory.entryInfoList():
+            print("%s %s" % (show.size(), show.fileName()))
+            if "heatmap" in show.fileName():
+                out = show.fileName()
+                break
+
+        w = self.label.width()
+        h = self.label.height()
+
+        pixmap = QPixmap(out)
+        pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
+        self.label.setPixmap(pixmap)
+
+    def show_counting(self):
+        directory = QDir(os.getcwd())
+        directory.setFilter(QDir.Files | QDir.NoDotDot | QDir.NoDotAndDotDot)
+        directory.setSorting(QDir.Time)
+        set_filter = ["*.jpg"]
+        directory.setNameFilters(set_filter)
+
+        for show in directory.entryInfoList():
+            print("%s %s" % (show.size(), show.fileName()))
+            if "graph" in show.fileName():
+                out = show.fileName()
+                break
+
+        w = self.label.width()
+        h = self.label.height()
+
+        pixmap = QPixmap(out)
+        pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
+        self.label.setPixmap(pixmap)
+
+    def set_progressbar(self):
+        maxval = 80
+        start = 0
+        print(1)
+        while start <= maxval:
+            start = start + 3
+            self.progressBar.setValue(start)
+            time.sleep(1)
 
 if __name__ == "__main__":
     import sys

@@ -24,7 +24,7 @@ from matplotlib import style
 
 th = 0
 people_number = 0
-
+duration = 0
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -123,7 +123,6 @@ def arg_parse():
                         default="416", type=str)
     return parser.parse_args()
 
-
 if __name__ == '__main__':
     args = arg_parse()
     confidence = float(args.confidence)
@@ -193,7 +192,6 @@ if __name__ == '__main__':
 
         for x in range(11): cap.grab()
 
-
         if (first_iteration_indicator == 1):
             ret, frame = cap.read()
             first_frame = copy.deepcopy(frame)
@@ -222,7 +220,7 @@ if __name__ == '__main__':
                 if type(output) == int:
                     frames += 1
                     # print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
-                    cv2.imshow("frame", orig_im)
+                    # cv2.imshow("frame", orig_im)
                     key = cv2.waitKey(1)
                     if key & 0xFF == ord('q'):
                         break
@@ -245,7 +243,7 @@ if __name__ == '__main__':
 
                 m = list(map(lambda x: write(x, orig_im), output))
 
-                cv2.imshow("frame", orig_im)
+                # cv2.imshow("frame", orig_im)
                 output_video.write(orig_im)
                 orig_im.fill(0)
 
@@ -284,6 +282,7 @@ if __name__ == '__main__':
                 accum_image = cv2.add(accum_image, th1, dtype=cv2.CV_64F)
             else:
                 break
+
     accum_image = np.uint8(accum_image)
     color_image = im_color = cv2.applyColorMap(accum_image, cv2.COLORMAP_JET)
     # overlay the color mapped image to the first frame
