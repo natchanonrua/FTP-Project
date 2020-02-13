@@ -273,7 +273,7 @@ if __name__ == '__main__':
 
                 fgmask = fgbg.apply(gray)
 
-                thresh = 150
+                thresh = 100
                 maxValue = 10
                 ret, th1 = cv2.threshold(fgmask, thresh, maxValue, cv2.THRESH_BINARY)
 

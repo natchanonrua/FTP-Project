@@ -49,7 +49,7 @@ class Ui_main():
     def setupUi(self, main):
         main.setObjectName("main")
         main.setWindowModality(QtCore.Qt.NonModal)
-        main.resize(1230, 318)
+        main.resize(1230, 500)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -158,7 +158,7 @@ class Ui_main():
         # self.menuLayout.addItem(spacerItem2)
         #
         #
-        self.horizontalLayoutWidget_3.setGeometry(QtCore.QRect(20, 240, 1191, 39))
+        self.horizontalLayoutWidget_3.setGeometry(QtCore.QRect(20, 420, 1191, 39))
         self.horizontalLayoutWidget_3.setObjectName("horizontalLayoutWidget_3")
         self.buttonLayout.setContentsMargins(0, 0, 0, 0)
         self.buttonLayout.setObjectName("buttonLayout")
@@ -211,32 +211,33 @@ class Ui_main():
         self.submitButton.setFont(font)
         self.submitButton.setObjectName("submitButton")
         self.submitButton.clicked.connect(self.run_process)
+        self.submitButton.setEnabled(False)
         self.buttonLayout.addWidget(self.submitButton)
         #
         #
-        self.videoWidget.setGeometry(QtCore.QRect(20, 20, 380, 201))
+        self.videoWidget.setGeometry(QtCore.QRect(20, 20, 380, 380))
         self.videoWidget.setAutoFillBackground(False)
         self.videoWidget.setObjectName("videoWidget")
         #
         #
-        self.heatmapLabel.setGeometry(QtCore.QRect(420, 20, 380, 201))
+        self.heatmapLabel.setGeometry(QtCore.QRect(420, 20, 380, 380))
         self.heatmapLabel.setFrameShape(QtWidgets.QFrame.Box)
         self.heatmapLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.heatmapLabel.setObjectName("heatmapLabel")
 
-        self.statusLabel.setGeometry(QtCore.QRect(1140, 280, 71, 31))
+        self.statusLabel.setGeometry(QtCore.QRect(1140, 460, 70, 30))
         self.statusLabel.setScaledContents(False)
         self.statusLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.statusLabel.setIndent(-1)
         self.statusLabel.setObjectName("statusLabel")
 
-        self.countingLabel.setGeometry(QtCore.QRect(830, 20, 380, 201))
+        self.countingLabel.setGeometry(QtCore.QRect(830, 20, 380, 380))
         self.countingLabel.setFrameShape(QtWidgets.QFrame.Box)
         self.countingLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.countingLabel.setObjectName("countingLabel")
         #
         #
-        self.statusTitle.setGeometry(QtCore.QRect(1090, 280, 61, 31))
+        self.statusTitle.setGeometry(QtCore.QRect(1090, 460, 60, 30))
         self.statusTitle.setScaledContents(False)
         self.statusTitle.setAlignment(QtCore.Qt.AlignCenter)
         self.statusTitle.setIndent(-1)
@@ -264,7 +265,7 @@ class Ui_main():
     def abrir(self):
         global name_in
         selected_file, _ = QFileDialog.getOpenFileName(None, "Select a video", ".",
-                                                  "Video Files (*.mp4 *.flv *.ts *.mts *.avi)")
+                                                  "Video Files (*.mp4 *.flv *.ts *.mts *.avi *.mpg)")
         if selected_file != '':
             self.mediaPlayer.setMedia(
                 QMediaContent(QUrl.fromLocalFile(selected_file)))
@@ -277,14 +278,22 @@ class Ui_main():
 
             self.statusLabel.setText("Ready")
 
+            self.submitButton.setEnabled(True)
+
+            self.heatmapLabel.clear()
+            self.heatmapLabel.setText("Heatmap")
+
+            self.countingLabel.clear()
+            self.countingLabel.setText("Counting people")
+
     def play(self):
         self.mediaPlayer.play()
 
     def run_process(self):
+        self.statusLabel.setText("Processing")
         if "test" in name_in:
             return
         else:
-            self.statusLabel.setText("Processing...")
             command = "conda activate yolov3 && python ftp_combine01.py --video "+name_in
             os.system(command)
             self.show_video()
@@ -293,6 +302,8 @@ class Ui_main():
             if self.counting.isChecked():
                 self.show_counting()
             self.statusLabel.setText("Complete")
+            self.selectButton.setEnabled(True)
+            self.submitButton.setEnabled(False)
 
     def show_video(self):
         directory = QDir(os.getcwd())
@@ -308,8 +319,9 @@ class Ui_main():
 
         self.mediaPlayer.setMedia(
             QMediaContent(QUrl.fromLocalFile(os.getcwd()+"\\"+out)))
-        self.mediaPlayer.setPlaybackRate()
+        # self.mediaPlayer.setPlaybackRate()
         self.play()
+        if self.mediaPlayer.
 
     def show_heatmap(self):
         directory = QDir(os.getcwd())
