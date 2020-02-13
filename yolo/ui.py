@@ -321,7 +321,6 @@ class Ui_main():
             QMediaContent(QUrl.fromLocalFile(os.getcwd()+"\\"+out)))
         # self.mediaPlayer.setPlaybackRate()
         self.play()
-        if self.mediaPlayer.
 
     def show_heatmap(self):
         directory = QDir(os.getcwd())
