@@ -2,7 +2,8 @@ from __future__ import division
 
 from datetime import datetime
 
-import ui as interface
+# import ui as interface
+import calendar
 import time
 import torch
 import torch.nn as nn
@@ -25,6 +26,7 @@ from matplotlib import style
 th = 0
 people_number = 0
 duration = 0
+
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -123,6 +125,7 @@ def arg_parse():
                         default="416", type=str)
     return parser.parse_args()
 
+
 if __name__ == '__main__':
     args = arg_parse()
     confidence = float(args.confidence)
@@ -164,11 +167,19 @@ if __name__ == '__main__':
     assert cap.isOpened(), 'Cannot capture source'
 
     frames = 0
-    start = time.time()
+
+    f = open('soul.txt', 'r').read()
+    lines = f.split('\n')
+    for line in lines:
+        if len(line) > 0:
+            x, y = line.split(',')
+
+    start = time.gmtime(int(y))
 
     first_iteration_indicator = 1
 
     count = 0
+    num_count = 0
 
     fgbg = cv2.createBackgroundSubtractorMOG2()
 
@@ -184,15 +195,47 @@ if __name__ == '__main__':
 
     height_video = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    frame_size = (width_video,height_video)
+    frame_size = (width_video, height_video)
 
     output_video = cv2.VideoWriter(file_name + ".avi", fourcc, output_fps, frame_size)
 
+    calculated_fps = float("{0:.1f}".format(cap.get(cv2.CAP_PROP_FPS)))
+
+    print(calculated_fps)
+
+    no_fps = float(calculated_fps / 2) - 1
+
+    grab_fps = True
+
+    if (no_fps % 1) != 0:
+        odd_fps = True
+        checked_fps = False
+    else:
+        odd_fps = False
+
+    print(no_fps)
+
     while cap.isOpened():
+        #
+        # if not grab_fps:
+        #     if odd_fps is True:
+        #         if checked_fps is False:
+        #             no_fps = no_fps + 1
+        #             checked_fps = True
+        #         else:
+        #             no_fps = no_fps - 1
+        #             checked_fps = False
+        #     print(no_fps)
+        #     for x in range(int(no_fps)):
+        #         cap.grab()
+        #     grab_fps = True
+        #     print("Grab")
+        # else:
+        #     print("Not Grab")
+        #     grab_fps = False
 
-        for x in range(11): cap.grab()
-
-        if (first_iteration_indicator == 1):
+        if first_iteration_indicator == 1:
+            # print(start)
             ret, frame = cap.read()
             first_frame = copy.deepcopy(frame)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -200,7 +243,13 @@ if __name__ == '__main__':
             height, width = gray.shape[:2]
             accum_image = np.zeros((height, width), np.float64)
             first_iteration_indicator = 0
+            if count == 0:
+                f = open("count.txt", "w+")
+                count = 1
+            grab_fps = True
         else:
+            for x in range(int(no_fps)):
+                cap.grab()
             ret, frame = cap.read()
             if ret:
 
@@ -254,15 +303,24 @@ if __name__ == '__main__':
 
                 # interface.Ui_main().set_number(s)
 
-                if (count == 0):
-                    f = open("count.txt", "w+")
-                    f.write("%d,%d \r\n" % (count, s))
-                    count += 1
-
-                else:
+                if (count == 1):
+                    num_count += 1
+                    i = time.strftime("%H:%M:%S", start)
+                    h = calendar.timegm(start)
                     f = open("count.txt", "a+")
-                    f.write("%d,%d \r\n" % (count, s))
-                    count += 1
+                    f.write("%s,%d,%d \r\n" % (i, s, num_count))
+                    h = h + 0.5 * count
+                    count = 2
+                    start = time.gmtime(h)
+                else:
+                    num_count += 1
+                    i = time.strftime("%H:%M:%S", start)
+                    h = calendar.timegm(start)
+                    f = open("count.txt", "a+")
+                    f.write("%s,%d,%d \r\n" % (i, s, num_count))
+                    h = h + 0.5 * count
+                    count = 1
+                    start = time.gmtime(h)
 
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
@@ -289,19 +347,61 @@ if __name__ == '__main__':
     result_overlay = cv2.addWeighted(first_frame, 0.4, color_image, 0.4, 0)
 
     # save the final overlay image
-    cv2.imwrite(file_name+'-heatmap.jpg', result_overlay)
+    cv2.imwrite(file_name + '-heatmap.jpg', result_overlay)
 
     graph_data = open('count.txt', 'r').read()
     lines = graph_data.split('\n')
     xs = []
     ys = []
+    zs = []
+    ms = []
+    us = []
+    temp = 0
+    p = len(lines) / 10
+    c = 0
+    m = 0
+    num = 0
+    # blank = string.whitespace
     for line in lines:
+        num += 1
         if len(line) > 1:
-            x, y = line.split(',')
-            xs.append(int(x))
-            ys.append(int(y))
+            x, y, z = line.split(',')
+            result = time.strptime(x, "%H:%M:%S")
+            if temp == 0:
+                xs.append(int(z))
+                ys.append(int(y))
+                zs.append(x)
+                temp = 1
+            else:
+                if c >= 0 and c < p:
+                    m = m + int(y)
+                    c += 1
+                else:
+                    m = m + int(y)
+                    c += 1
+                    m = m / c
+                    xs.append(int(z))
+                    print(z)
+                    ys.append(int(m))
+                    print(",")
+                    zs.append(x)
+                    print(x)
+                    m = 0
+                    c = 0
+        if num >= len(lines):
+            m = m + int(y)
+            c += 1
+            m = m / c
+            xs.append(int(z))
+            print(z)
+            ys.append(int(m))
+            print(",")
+            zs.append(x)
+            print(x)
+
+    plt.xticks(xs, zs)
     plt.plot(xs, ys)
-    plt.savefig(file_name+'-graph.jpg')
+    plt.savefig(file_name + '-graph.jpg')
 
     # cleanup1
     output_video.release()
