@@ -136,7 +136,7 @@ def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.
         max_conf_score = max_conf_score.float().unsqueeze(1)
         seq = (image_pred[:,:5], max_conf, max_conf_score)
         image_pred = torch.cat(seq, 1)
-
+        #print(image_pred)
 
 
         #Get rid of the zero entries
@@ -144,7 +144,8 @@ def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.
 
         
         image_pred_ = image_pred[non_zero_ind.squeeze(),:].view(-1,7)
-
+        f = open("xxx.txt", "w+")
+        f.write("%s \r\n" % (image_pred_))
         #Get the various classes detected in the image
         try:
             img_classes = unique(image_pred_[:,-1])
@@ -155,10 +156,10 @@ def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.
             #get the detections with one particular class
             cls_mask = image_pred_*(image_pred_[:,-1] == cls).float().unsqueeze(1)
             class_mask_ind = torch.nonzero(cls_mask[:,-2]).squeeze()
-            
+
 
             image_pred_class = image_pred_[class_mask_ind].view(-1,7)
-
+            # print(image_pred_class)
 		
         
              #sort the detections such that the entry with the maximum objectness
@@ -184,10 +185,12 @@ def write_results(prediction, confidence, num_classes, nms = True, nms_conf = 0.
                     #Zero out all the detections that have IoU > treshhold
                     iou_mask = (ious < nms_conf).float().unsqueeze(1)
                     image_pred_class[i+1:] *= iou_mask
-                    
+                    #print(image_pred_class)
+
                     #Remove the non-zero entries
                     non_zero_ind = torch.nonzero(image_pred_class[:,4]).squeeze()
                     image_pred_class = image_pred_class[non_zero_ind].view(-1,7)
+
                     
                     
 

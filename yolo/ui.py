@@ -12,6 +12,7 @@ import time
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 
 # import ftp_combine01 as cnn
+from moviepy.video.fx.crop import crop
 
 try:
     # new location for sip
@@ -21,10 +22,10 @@ except ImportError:
     import sip
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QUrl, QFileInfo, QDir, QThread, pyqtSignal, QSize, QPoint
+from PyQt5.QtCore import QUrl, QFileInfo, QDir, QThread, pyqtSignal, QSize, QPoint, QRect
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow, QApplication
 
 from moviepy.editor import *
 
@@ -32,6 +33,24 @@ from moviepy.editor import *
 
 num = 0
 name_in = "test"
+
+
+def get_zone_position():
+    m = open('zone_position.txt', 'r').read()
+    lines = m.split('\n')
+    x = []
+    y = []
+    for line in lines:
+        if len(line) > 1:
+            x0, y0 = line.split(',')
+            x.append(x0)
+            y.append(y0)
+    x1 = x[0]
+    x2 = x[1]
+    y1 = y[0]
+    y2 = y[1]
+
+    return x1, x2, y1, y2
 
 
 class Ui_main():
@@ -206,6 +225,7 @@ class Ui_main():
         self.zoneButton.setFont(font)
         self.zoneButton.setObjectName("zoneButton")
         self.zoneButton.clicked.connect(self.select_zone)
+        self.zoneButton.setEnabled(False)
 
         self.outputdiButton = QtWidgets.QPushButton(main)
         self.outputdiButton.setGeometry(QtCore.QRect(546, 482, 171, 41))
@@ -238,6 +258,11 @@ class Ui_main():
         # self.setGeometry(100, 100, 500, 300)
         # self.resize(self.image.width(), self.image.height())
         # self.show()
+        #
+        #
+        self.lastPoint = QPoint()
+        self.startPoint = QPoint()
+        self.drawing = False
 
     def retranslateUi(self, main):
         _translate = QtCore.QCoreApplication.translate
@@ -276,11 +301,14 @@ class Ui_main():
 
             self.statusLabel.setText("Ready")
             self.submitButton.setEnabled(True)
+            self.zoneButton.setEnabled(True)
             self.heatmapLabel.clear()
             self.heatmapLabel.setText("Heatmap")
 
             self.countingLabel.clear()
             self.countingLabel.setText("Counting people")
+
+            # self.select_zone()
 
     def play(self):
         self.mediaPlayer.play()
@@ -308,7 +336,6 @@ class Ui_main():
         else:
             self.statusLabel.setText("Time Error")
 
-
     def show_video(self):
         directory = QDir(os.getcwd())
         directory.setFilter(QDir.Files | QDir.NoDotDot | QDir.NoDotAndDotDot)
@@ -321,8 +348,18 @@ class Ui_main():
             out = show.fileName()
             break
 
+        x1, x2, y1, y2 = get_zone_position()
+
+        clip = VideoFileClip(out)
+
+        cut_video = crop(clip, x1, y1, x2, y2)
+
+        name_of_file = QFileInfo(out).baseName() + "_cut.avi"
+        cut_video.write_videofile(name_of_file, codec='mpeg4', audio=False)
+
         self.mediaPlayer.setMedia(
-            QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\\" + out)))
+            QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\\" + name_of_file))
+        )
         # self.mediaPlayer.setPlaybackRate()
         self.play()
 
@@ -339,10 +376,18 @@ class Ui_main():
                 out = show.fileName()
                 break
 
+        print("Start")
+
+        x1, x2, y1, y2 = get_zone_position()
+        crop = QRect(x1, x2, y1-x1, y2-x2)
+        print(crop.getRect())
+
         w = self.heatmapLabel.width()
         h = self.heatmapLabel.height()
 
         pixmap = QPixmap(out)
+        pixmap = pixmap.copy(crop)
+        print("Pass")
         pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
         self.heatmapLabel.setPixmap(pixmap)
 
@@ -367,11 +412,8 @@ class Ui_main():
         self.countingLabel.setPixmap(pixmap)
 
     def cut_video(self):
-        print("a")
         file = QFileInfo(self.selected).fileName()
-        print(file)
         clip = VideoFileClip(file)
-        print("b")
         starttime_hour = int(self.startTimeEdit.time().hour()) - int(self.beginTimeEdit.time().hour())
         starttime_minute = int(self.startTimeEdit.time().minute()) - int(self.beginTimeEdit.time().minute())
         starttime_second = int(self.startTimeEdit.time().second()) - int(self.beginTimeEdit.time().second())
@@ -379,15 +421,28 @@ class Ui_main():
         endtime_minute = int(self.endTimeEdit.time().minute()) - int(self.beginTimeEdit.time().minute())
         endtime_second = int(self.endTimeEdit.time().second()) - int(self.beginTimeEdit.time().second())
 
-        cut_video = clip.subclip((starttime_hour, starttime_minute, starttime_second), (endtime_hour, endtime_minute, endtime_second))
+        cut_video = clip.subclip((starttime_hour, starttime_minute, starttime_second),
+                                 (endtime_hour, endtime_minute, endtime_second))
 
-        print("c")
+        # m = open('zone_position.txt', 'r').read()
+        # lines = m.split('\n')
+        # x = []
+        # y = []
+        # for line in lines:
+        #     if len(line) > 1:
+        #         x0, y0 = line.split(',')
+        #         x.append(x0)
+        #         y.append(y0)
+        # x1 = x[0]
+        # x2 = x[1]
+        # y1 = y[0]
+        # y2 = y[1]
+        #
+        # cut_video = crop(cut_video, x1, y1, x2, y2)
+
         name_of_file = QFileInfo(self.selected).baseName() + "_cut.avi"
-        print("d")
         self.name_in = str(name_of_file)
-        print("e")
         cut_video.write_videofile(name_of_file, codec='mpeg4', audio=False)
-        print("f")
 
     def write_time(self):
         h = int(self.startTimeEdit.time().hour())
@@ -401,76 +456,18 @@ class Ui_main():
         f.write("%s,%d\r\n" % (x1, y))
 
     def select_zone(self):
-        zone = QtWidgets.QDialog()
-        zone.ui = Ui_zone()
-        zone.ui.setupUi(zone)
-        zone.exec_()
+        file = QFileInfo(self.selected).fileName()
+        clip = VideoFileClip(file)
+        clip.save_frame("selected_zone.jpg", 1)
 
-class Ui_zone(object):
-    def setupUi(self, zone):
-        zone.setObjectName("zone")
-        zone.resize(702, 444)
-        self.buttonBox = QtWidgets.QDialogButtonBox(zone)
-        self.buttonBox.setGeometry(QtCore.QRect(510, 395, 161, 32))
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName("buttonBox")
-        self.zoneLabel = QtWidgets.QLabel(zone)
-        self.zoneLabel.setGeometry(QtCore.QRect(30, 20, 640, 360))
-        self.zoneLabel.setFrameShape(QtWidgets.QFrame.Box)
-        self.zoneLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.zoneLabel.setObjectName("zoneLabel")
+        # self.image = QPixmap('cutzone.jpg')
+        # self.zone_pic = self.image.scaled(self.image.size(), QtCore.Qt.KeepAspectRatio)
+        # self.zoneLabel.setScaledContents(True)
+        # self.zoneLabel.setPixmap(self.zone_pic)
 
-        self.lastPoint = QPoint()
-        self.startPoint = QPoint()
-        self.drawing = False
-        image = QPixmap("dog.jpg")
-        self.zoneLabel.setPixmap(image)
+        command = "python cut_zone.py"
+        os.system(command)
 
-        self.retranslateUi(zone)
-        self.buttonBox.accepted.connect(zone.accept)
-        self.buttonBox.rejected.connect(zone.reject)
-        QtCore.QMetaObject.connectSlotsByName(zone)
-
-    def retranslateUi(self, zone):
-        _translate = QtCore.QCoreApplication.translate
-        zone.setWindowTitle(_translate("zone", "Zone Separate "))
-        self.zoneLabel.setText(_translate("zone", "Zone Separate Analysis"))
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.drawPixmap(self.rect(), self.image)
-
-    def mousePressEvent(self, event):
-        image = QPixmap("dog.jpg")
-        self.zoneLabel.setPixmap(image)
-        # painter = QPainter(self.image)
-        # painter.setPen(QPen(Qt.red, 3, Qt.SolidLine))
-        if event.button() == Qt.LeftButton:
-            # self.image = QPixmap("dog.jpg")
-            self.drawing = True
-            if checked:
-                self.startPoint = event.pos()
-            self.lastPoint = event.pos()
-            # painter.drawRect(self.startPoint.x(), self.startPoint.y(), (self.lastPoint.x() - self.startPoint.x()),
-            #                  (self.lastPoint.y() - self.startPoint.y()))
-            # self.update()
-            print(self.lastPoint)
-
-    def mouseMoveEvent(self, event):
-        if event.buttons() and Qt.LeftButton and self.drawing:
-            # painter.drawLine(self.lastPoint, event.pos())
-            self.lastPoint = event.pos()
-            # painter.setPen(QPen(Qt.blue, 3, Qt.SolidLine))
-
-    def mouseReleaseEvent(self, event):
-        painter = QPainter(self.image)
-        painter.setPen(QPen(Qt.red, 3, Qt.SolidLine))
-        painter.drawRect(self.startPoint.x(), self.startPoint.y(), (self.lastPoint.x() - self.startPoint.x()),
-                         (self.lastPoint.y() - self.startPoint.y()))
-        self.update()
-        if event.button == Qt.LeftButton:
-            self.drawing = False
 
 if __name__ == "__main__":
     import sys
