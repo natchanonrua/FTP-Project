@@ -9,6 +9,7 @@
 import calendar
 import shutil
 import time
+from PIL import Image
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 
 # import ftp_combine01 as cnn
@@ -45,17 +46,18 @@ def get_zone_position():
             x0, y0 = line.split(',')
             x.append(x0)
             y.append(y0)
-    x1 = x[0]
-    x2 = x[1]
-    y1 = y[0]
-    y2 = y[1]
+    x1 = int(x[0])
+    x2 = int(x[1])
+    y1 = int(y[0])
+    y2 = int(y[1])
 
-    return x1, x2, y1, y2
+    return x1, y1, x2, y2
 
 
 class Ui_main():
-    global name_in, out, selected, checked
+    global name_in, out, selected, checked, zone_cutted
     checked = True
+    zone_cutted = False
 
     def __init__(self):
         self.horizontalLayoutWidget_3 = QtWidgets.QWidget(main)
@@ -299,6 +301,8 @@ class Ui_main():
             if QFileInfo(selected_file).path() != QDir.currentPath():
                 shutil.copy(selected_file, os.getcwd() + "\\" + name_of_file)
 
+            f = open("zone_position.txt", "w+")
+
             self.statusLabel.setText("Ready")
             self.submitButton.setEnabled(True)
             self.zoneButton.setEnabled(True)
@@ -307,6 +311,17 @@ class Ui_main():
 
             self.countingLabel.clear()
             self.countingLabel.setText("Counting people")
+
+            clip = VideoFileClip(name_of_file)
+            clip.save_frame("selected_zone.jpg", 1)
+
+            w = self.zoneLabel.width()
+            h = self.zoneLabel.height()
+
+            pixmap = QPixmap("selected_zone.jpg")
+            pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
+
+            self.zoneLabel.setPixmap(pixmap)
 
             # self.select_zone()
 
@@ -319,12 +334,9 @@ class Ui_main():
             self.write_time()
             self.statusLabel.setText("Converting")
             self.cut_video()
-            print(1)
-            print(self.name_in)
             self.statusLabel.setText("Processing")
             command = "conda activate yolov3 && python ftp_combine01.py --video " + self.name_in
             os.system(command)
-            print(3)
             self.show_video()
             if self.heatmap.isChecked():
                 self.show_heatmap()
@@ -348,14 +360,17 @@ class Ui_main():
             out = show.fileName()
             break
 
-        x1, x2, y1, y2 = get_zone_position()
+        if self.zone_cutted:
+            x1, y1, x2, y2 = get_zone_position()
 
-        clip = VideoFileClip(out)
+            clip = VideoFileClip(out)
+            cut_video = crop(clip, x1, y1, x2, y2)
 
-        cut_video = crop(clip, x1, y1, x2, y2)
+            name_of_file = QFileInfo(out).baseName() + "_zone.avi"
+            cut_video.write_videofile(name_of_file, codec='mpeg4', audio=False)
 
-        name_of_file = QFileInfo(out).baseName() + "_cut.avi"
-        cut_video.write_videofile(name_of_file, codec='mpeg4', audio=False)
+        else:
+            name_of_file = out
 
         self.mediaPlayer.setMedia(
             QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\\" + name_of_file))
@@ -376,18 +391,21 @@ class Ui_main():
                 out = show.fileName()
                 break
 
-        print("Start")
-
-        x1, x2, y1, y2 = get_zone_position()
-        crop = QRect(x1, x2, y1-x1, y2-x2)
-        print(crop.getRect())
-
         w = self.heatmapLabel.width()
         h = self.heatmapLabel.height()
 
-        pixmap = QPixmap(out)
-        pixmap = pixmap.copy(crop)
-        print("Pass")
+        if self.zone_cutted:
+            x1, y1, x2, y2 = get_zone_position()
+
+            imageObject = Image.open(out)
+            cropped = imageObject.crop((x1, y1, x2, y2))
+            name_of_file = QFileInfo(out).baseName() + "_zone.jpg"
+            cropped.save(name_of_file)
+
+            pixmap = QPixmap(name_of_file)
+        else:
+            pixmap = QPixmap(out)
+
         pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
         self.heatmapLabel.setPixmap(pixmap)
 
@@ -460,6 +478,8 @@ class Ui_main():
         clip = VideoFileClip(file)
         clip.save_frame("selected_zone.jpg", 1)
 
+        self.zone_cutted = True
+
         # self.image = QPixmap('cutzone.jpg')
         # self.zone_pic = self.image.scaled(self.image.size(), QtCore.Qt.KeepAspectRatio)
         # self.zoneLabel.setScaledContents(True)
@@ -468,6 +488,15 @@ class Ui_main():
         command = "python cut_zone.py"
         os.system(command)
 
+        w = self.zoneLabel.width()
+        h = self.zoneLabel.height()
+
+        pixmap = QPixmap("cropped_zone.jpg")
+        pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
+
+        # time.sleep(5)
+
+        self.zoneLabel.setPixmap(pixmap)
 
 if __name__ == "__main__":
     import sys

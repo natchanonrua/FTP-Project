@@ -58,14 +58,14 @@ def prep_image(img, inp_dim):
 
 def write(x, img):
     c1 = tuple(x[1:3].int())
-    #print(x[1:3].int())
-    #print(x[1])
-    #print('++++++')
-    #print(x[2])
-    #print(c1)
+    # print(x[1:3].int())
+    # print(x[1])
+    # print('++++++')
+    # print(x[2])
+    # print(c1)
     c2 = tuple(x[3:5].int())
-    #print(c2)
-    #print(x[3:5].int())
+    # print(c2)
+    # print(x[3:5].int())
     cls = int(x[-1])
     label = "{0}".format(classes[cls])
     color = random.choice(colors)
@@ -177,7 +177,9 @@ if __name__ == '__main__':
 
     frames = 0
 
+
     zone_time = 0
+    point_x1 = 0
     zone = open('zone_position.txt', 'r').read()
     lines = zone.split('\n')
     for line in lines:
@@ -190,6 +192,7 @@ if __name__ == '__main__':
             else:
                 point_x2 = int(x)
                 point_y2 = int(y)
+
 
     f = open('soul.txt', 'r').read()
     lines = f.split('\n')
@@ -287,7 +290,6 @@ if __name__ == '__main__':
                 with torch.no_grad():
                     output = model(Variable(img), CUDA)
 
-
                 output = write_results(output, confidence, num_classes, nms=True, nms_conf=nms_thesh)
                 # print(output[1])
                 f = open("doujin.txt", "w+")
@@ -310,35 +312,35 @@ if __name__ == '__main__':
 
                 output[:, 1:5] /= scaling_factor
 
-
                 for i in range(output.shape[0]):
-                    x_start = torch.clamp(output[i, [1]], 0.0).int()
-                    y_start = torch.clamp(output[i, [3]], 0.0).int()
-                    x_end = torch.clamp(output[i, [2]], 0.0).int()
-                    y_end = torch.clamp(output[i, [4]], 0.0).int()
-                    if(point_x1<= x_start <= point_x2 or point_x1 <= x_end <= point_x2):
-                        #print('num 1')
-                        if(point_y1 <= y_start <=point_y2 or point_y1 <= y_end <= point_y2)
-                            floor = floor + 1
-                        #if(point_y1 <= y_start <=point_y2 and point_y1 <= y_end <= point_y2):
-                        #    print('num 2')
+                    if(point_x1 != 0):
+                        x_start = torch.clamp(output[i, [1]], 0.0).int()
+                        y_start = torch.clamp(output[i, [3]], 0.0).int()
+                        x_end = torch.clamp(output[i, [2]], 0.0).int()
+                        y_end = torch.clamp(output[i, [4]], 0.0).int()
+                        if point_x1 <= x_start <= point_x2 or point_x1 <= x_end <= point_x2:
+                            # print('num 1')
+                            if point_y1 <= y_start <= point_y2 or point_y1 <= y_end <= point_y2:
+                                floor = floor + 1
+                            # if(point_y1 <= y_start <=point_y2 and point_y1 <= y_end <= point_y2):
+                            #    print('num 2')
 
-                    #print('x_start')
-                    #print(x_start)
-                    #print('x_end')
-                    #print(x_end)
-                    #print('------------1')
-                    #print('y_start')
-                    #print(y_start)
-                    #print('y_end')
-                    #print(y_end)
-                    #print('------------2')
+                    # print('x_start')
+                    # print(x_start)
+                    # print('x_end')
+                    # print(x_end)
+                    # print('------------1')
+                    # print('y_start')
+                    # print(y_start)
+                    # print('y_end')
+                    # print(y_end)
+                    # print('------------2')
                     output[i, [1, 3]] = torch.clamp(output[i, [1, 3]], 0.0, im_dim[i, 0])
                     output[i, [2, 4]] = torch.clamp(output[i, [2, 4]], 0.0, im_dim[i, 1])
 
-                #print(floor)
+                # print(floor)
                 count_z = floor
-                if(count_z != 0):
+                if (count_z != 0):
                     floor = 0
 
                 classes = load_classes('data/coco.names')
@@ -352,15 +354,14 @@ if __name__ == '__main__':
 
                 h = list(map(lambda x: write_heatmap(x, orig_im), output))
 
-                #print(count_z)
-                s_z = count_z
-                print(s_z)
-                if(s_z != 0):
-                    count_z = 0
-
-
-                s = len(m)
-                # print(s)
+                # print(count_z)
+                if(point_x1 != 0):
+                    s_z = count_z
+                    print(s_z)
+                    if (s_z != 0):
+                        count_z = 0
+                else:
+                    s_z = len(m)
 
                 # interface.Ui_main().set_number(s)
 
