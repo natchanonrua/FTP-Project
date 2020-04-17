@@ -315,8 +315,8 @@ if __name__ == '__main__':
                 for i in range(output.shape[0]):
                     if(point_x1 != 0):
                         x_start = torch.clamp(output[i, [1]], 0.0).int()
-                        y_start = torch.clamp(output[i, [3]], 0.0).int()
-                        x_end = torch.clamp(output[i, [2]], 0.0).int()
+                        x_end = torch.clamp(output[i, [3]], 0.0).int()
+                        y_start = torch.clamp(output[i, [2]], 0.0).int()
                         y_end = torch.clamp(output[i, [4]], 0.0).int()
                         if point_x1 <= x_start <= point_x2 or point_x1 <= x_end <= point_x2:
                             # print('num 1')

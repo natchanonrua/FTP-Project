@@ -9,6 +9,7 @@
 import calendar
 import shutil
 import time
+
 from PIL import Image
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 
@@ -229,20 +230,20 @@ class Ui_main():
         self.zoneButton.clicked.connect(self.select_zone)
         self.zoneButton.setEnabled(False)
 
-        self.outputdiButton = QtWidgets.QPushButton(main)
-        self.outputdiButton.setGeometry(QtCore.QRect(546, 482, 171, 41))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.outputdiButton.sizePolicy().hasHeightForWidth())
-        self.outputdiButton.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.outputdiButton.setFont(font)
-        self.outputdiButton.setObjectName("outputdiButton")
-        self.outputdiText = QtWidgets.QTextEdit(main)
-        self.outputdiText.setGeometry(QtCore.QRect(730, 490, 481, 31))
-        self.outputdiText.setObjectName("outputdiText")
+        # self.outputdiButton = QtWidgets.QPushButton(main)
+        # self.outputdiButton.setGeometry(QtCore.QRect(546, 482, 171, 41))
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.outputdiButton.sizePolicy().hasHeightForWidth())
+        # self.outputdiButton.setSizePolicy(sizePolicy)
+        # font = QtGui.QFont()
+        # font.setPointSize(10)
+        # self.outputdiButton.setFont(font)
+        # self.outputdiButton.setObjectName("outputdiButton")
+        # self.outputdiText = QtWidgets.QTextEdit(main)
+        # self.outputdiText.setGeometry(QtCore.QRect(730, 490, 481, 31))
+        # self.outputdiText.setObjectName("outputdiText")
         self.zoneLabel = QtWidgets.QLabel(main)
         self.zoneLabel.setGeometry(QtCore.QRect(20, 483, 480, 270))
         self.zoneLabel.setFrameShape(QtWidgets.QFrame.Box)
@@ -285,7 +286,7 @@ class Ui_main():
         self.endTimeEdit.setDisplayFormat(_translate("main", "HH:mm:ss"))
 
         self.zoneButton.setText(_translate("main", "Zone separate analysis"))
-        self.outputdiButton.setText(_translate("main", "Output Directory"))
+        # self.outputdiButton.setText(_translate("main", "Output Directory"))
         self.zoneLabel.setText(_translate("main", "Zone separate analysis"))
 
     def abrir(self):
@@ -298,6 +299,7 @@ class Ui_main():
             self.play()
             name_of_file = QFileInfo(selected_file).fileName()
             self.selected = name_of_file
+            self.name_in = name_of_file
             if QFileInfo(selected_file).path() != QDir.currentPath():
                 shutil.copy(selected_file, os.getcwd() + "\\" + name_of_file)
 
@@ -329,24 +331,35 @@ class Ui_main():
         self.mediaPlayer.play()
 
     def run_process(self):
-        # if (self.startTimeEdit.time().hour() != self.endTimeEdit.time().hour()) and (self.startTimeEdit.time().minute() != self.endTimeEdit.time().minute()) and (self.startTimeEdit.time().second() != self.endTimeEdit.time().second()):
-        if self.startTimeEdit.time() != self.endTimeEdit.time():
-            self.write_time()
-            self.statusLabel.setText("Converting")
-            self.cut_video()
-            self.statusLabel.setText("Processing")
-            command = "conda activate yolov3 && python ftp_combine01.py --video " + self.name_in
-            os.system(command)
-            self.show_video()
-            if self.heatmap.isChecked():
-                self.show_heatmap()
-            if self.counting.isChecked():
-                self.show_counting()
-            self.statusLabel.setText("Complete")
-            self.selectButton.setEnabled(True)
-            self.submitButton.setEnabled(False)
-        else:
+        if (self.beginTimeEdit.time().toString() > self.startTimeEdit.time().toString()) or (self.beginTimeEdit.time().toString() > self.endTimeEdit.time().toString()):
+            self.startTimeEdit.setTime(self.beginTimeEdit.time())
+            self.endTimeEdit.setTime(self.beginTimeEdit.time())
+            print(1)
             self.statusLabel.setText("Time Error")
+        else:
+            if self.startTimeEdit.time().toString() > self.endTimeEdit.time().toString():
+                self.endTimeEdit.setTime(self.startTimeEdit.time())
+                print(2)
+                self.statusLabel.setText("Time Error")
+            else:
+                if (self.beginTimeEdit.time().toString() != self.endTimeEdit.time().toString()) or (self.startTimeEdit.time().toString() != self.endTimeEdit.time().toString()):
+                    self.write_time()
+                    self.statusLabel.setText("Converting")
+                    self.cut_video()
+                    self.statusLabel.setText("Processing")
+
+                command = "conda activate yolov3 && python ftp_combine01.py --video " + self.name_in
+                os.system(command)
+                self.show_video()
+
+                if self.heatmap.isChecked():
+                    self.show_heatmap()
+                if self.counting.isChecked():
+                    self.show_counting()
+
+                self.statusLabel.setText("Complete")
+                self.selectButton.setEnabled(True)
+                self.submitButton.setEnabled(False)
 
     def show_video(self):
         directory = QDir(os.getcwd())
@@ -359,8 +372,9 @@ class Ui_main():
             print("%s %s" % (show.size(), show.fileName()))
             out = show.fileName()
             break
-
-        if self.zone_cutted:
+        print(1)
+        if zone_cutted:
+            print(2)
             x1, y1, x2, y2 = get_zone_position()
 
             clip = VideoFileClip(out)
@@ -370,13 +384,16 @@ class Ui_main():
             cut_video.write_videofile(name_of_file, codec='mpeg4', audio=False)
 
         else:
+            print(3)
             name_of_file = out
-
+        print(4)
         self.mediaPlayer.setMedia(
             QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\\" + name_of_file))
         )
+        print(5)
         # self.mediaPlayer.setPlaybackRate()
         self.play()
+        print(6)
 
     def show_heatmap(self):
         directory = QDir(os.getcwd())
@@ -497,6 +514,7 @@ class Ui_main():
         # time.sleep(5)
 
         self.zoneLabel.setPixmap(pixmap)
+
 
 if __name__ == "__main__":
     import sys

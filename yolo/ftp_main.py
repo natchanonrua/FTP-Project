@@ -1,5 +1,5 @@
 from __future__ import division
-import ui as interface
+
 import time
 import torch
 import torch.nn as nn
@@ -277,6 +277,34 @@ def run(self):
             ys.append(int(y))
     plt.plot(xs, ys)
     plt.savefig('test.jpg')
+
+    graph_data_2 = open('TownCentre-groundtruth.txt', 'r').read()
+    lines = graph_data_2.split('\n')
+    xs_g = []
+    ys_g = []
+    x_check = 0
+    count_g = 0
+    for line in lines:
+        if len(line) > 1:
+            id, frame, cq, cq2, x_1, y_1, x_2, y_2, x_3, y_3, x_4,_y_4 = line.split(',')
+            if(x_check == 0):
+                if(x_check == frame):
+                    count_g = count_g + 1
+                else:
+                    xs_g.append(int(count_g))
+                    ys_g.append(int(x_check))
+                    x_check = frame
+                    count_g = 1
+            else:
+                if (x_check == frame):
+                    count_g = count_g + 1
+                else:
+                    xs_g.append(int(count_g))
+                    ys_g.append(int(x_check))
+                    x_check = frame
+                    count_g = 1
+    plt.plot(xs_g, ys_g)
+    plt.savefig('ground.jpg')
 
     # cleanup1
     cap.release()

@@ -13,7 +13,7 @@ class Menu(QMainWindow):
         self.drawing = False
         self.startPoint = QPoint()
         self.lastPoint = QPoint()
-        self.image = QPixmap("selected_zone.jpg")
+        self.image = QPixmap("cutzone.jpg")
         self.setGeometry(100, 100, 500, 300)
         self.resize(self.image.width(), self.image.height())
         self.show()
@@ -50,6 +50,8 @@ class Menu(QMainWindow):
         painter.setPen(QPen(Qt.red, 3, Qt.SolidLine))
         painter.drawRect(self.startPoint.x(), self.startPoint.y(), (self.lastPoint.x() - self.startPoint.x()),
                          (self.lastPoint.y() - self.startPoint.y()))
+        painter.drawRect(656,595,136,392)
+        painter.drawRect(627,607,121,79)
         self.update()
         if event.button == Qt.LeftButton:
             self.drawing = False
