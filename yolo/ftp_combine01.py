@@ -173,6 +173,10 @@ if __name__ == '__main__':
 
     cap = cv2.VideoCapture(videofile)
 
+    print("Total Frame")
+    print(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    print("-------------------------------")
+
     assert cap.isOpened(), 'Cannot capture source'
 
     frames = 0
@@ -393,8 +397,11 @@ if __name__ == '__main__':
 
                 fgmask = fgbg.apply(gray)
 
+                deducted = (cap.get(cv2.CAP_PROP_FRAME_COUNT))/375
+                maxValue = 30 - deducted
+
                 thresh = 100
-                maxValue = 10
+                # maxValue = 30
                 ret, th1 = cv2.threshold(fgmask, thresh, maxValue, cv2.THRESH_BINARY)
 
                 cv2.imwrite('diff-th1.jpg', th1)

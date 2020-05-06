@@ -58,7 +58,7 @@ def get_zone_position():
 class Ui_main():
     global name_in, out, selected, checked, zone_cutted
     checked = True
-    zone_cutted = False
+
 
     def __init__(self):
         self.horizontalLayoutWidget_3 = QtWidgets.QWidget(main)
@@ -72,6 +72,7 @@ class Ui_main():
         self.heatmap = QtWidgets.QCheckBox(self.horizontalLayoutWidget_3)
         self.selectButton = QtWidgets.QPushButton(self.horizontalLayoutWidget_3)
         self.buttonLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_3)
+        self.zone_cutted = False
 
     def setupUi(self, main):
         main.setObjectName("main")
@@ -272,7 +273,7 @@ class Ui_main():
         main.setWindowTitle(_translate("main", "[FTP] Triple C System"))
         self.selectButton.setText(_translate("main", "Select Video"))
         self.heatmap.setText(_translate("main", "Heatmap"))
-        self.counting.setText(_translate("main", "Counting people"))
+        self.counting.setText(_translate("main", "Counting People"))
         self.submitButton.setText(_translate("main", "Submit"))
         self.heatmapLabel.setText(_translate("main", "Heatmap"))
         self.statusLabel.setText(_translate("main", "Not Ready"))
@@ -285,9 +286,9 @@ class Ui_main():
         self.startTimeEdit.setDisplayFormat(_translate("main", "HH:mm:ss"))
         self.endTimeEdit.setDisplayFormat(_translate("main", "HH:mm:ss"))
 
-        self.zoneButton.setText(_translate("main", "Zone separate analysis"))
+        self.zoneButton.setText(_translate("main", "Zone Separate Analysis"))
         # self.outputdiButton.setText(_translate("main", "Output Directory"))
-        self.zoneLabel.setText(_translate("main", "Zone separate analysis"))
+        self.zoneLabel.setText(_translate("main", "Zone Separate Analysis"))
 
     def abrir(self):
         global name_in
@@ -372,9 +373,9 @@ class Ui_main():
             print("%s %s" % (show.size(), show.fileName()))
             out = show.fileName()
             break
-        print(1)
-        if zone_cutted:
-            print(2)
+        # print(1)
+        if self.zone_cutted:
+            # print(2)
             x1, y1, x2, y2 = get_zone_position()
 
             clip = VideoFileClip(out)
@@ -384,33 +385,35 @@ class Ui_main():
             cut_video.write_videofile(name_of_file, codec='mpeg4', audio=False)
 
         else:
-            print(3)
+            # print(3)
             name_of_file = out
-        print(4)
+        # print(4)
         self.mediaPlayer.setMedia(
             QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\\" + name_of_file))
         )
-        print(5)
+        # print(5)
         # self.mediaPlayer.setPlaybackRate()
         self.play()
-        print(6)
+        # print(6)
 
     def show_heatmap(self):
+        # print("a")
         directory = QDir(os.getcwd())
         directory.setFilter(QDir.Files | QDir.NoDotDot | QDir.NoDotAndDotDot)
         directory.setSorting(QDir.Time)
         set_filter = ["*.jpg"]
         directory.setNameFilters(set_filter)
-
+        # print("b")
         for show in directory.entryInfoList():
             print("%s %s" % (show.size(), show.fileName()))
             if "heatmap" in show.fileName():
                 out = show.fileName()
                 break
-
+        # print("c")
         w = self.heatmapLabel.width()
         h = self.heatmapLabel.height()
-
+        # print("d")
+        # print("%r", self.zone_cutted)
         if self.zone_cutted:
             x1, y1, x2, y2 = get_zone_position()
 
@@ -422,9 +425,10 @@ class Ui_main():
             pixmap = QPixmap(name_of_file)
         else:
             pixmap = QPixmap(out)
-
+        # print("e")
         pixmap = pixmap.scaled(w, h, QtCore.Qt.KeepAspectRatio)
         self.heatmapLabel.setPixmap(pixmap)
+        # print("f")
 
     def show_counting(self):
         directory = QDir(os.getcwd())
